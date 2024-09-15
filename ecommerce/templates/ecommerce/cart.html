@@ -1,0 +1,38 @@
+{% extends 'ecommerce/base.html' %}
+
+{% block content %}
+<h1 class="mb-4">Your Cart</h1>
+
+{% if cart.cartitem_set.all %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in cart.cartitem_set.all %}
+        <tr>
+            <td>{{ item.product.title }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>${{ item.product.price }}</td>
+            <td>${{ item.total_price }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+    <tfoot>
+        <tr>
+            <td colspan="3"><strong>Total:</strong></td>
+            <td><strong>${{ cart.total_price }}</strong></td>
+        </tr>
+    </tfoot>
+</table>
+
+<a href="{% url 'checkout' %}" class="btn btn-primary btn-lg">Proceed to Checkout</a>
+{% else %}
+<p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}
