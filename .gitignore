@@ -1,1 +1,8 @@
 /.venv
+.env
+
+# Migration files
+*/migrations/[!'__init__.py']*
+
+# Database
+db.sqlite3
