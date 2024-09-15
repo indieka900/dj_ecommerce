@@ -37,6 +37,7 @@ class Product(models.Model):
     title = models.CharField(max_length=100)
     slug = models.SlugField(unique=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    featured = models.BooleanField(default=False)
     discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     quantity = models.PositiveIntegerField(default=0)
     description = models.TextField()
@@ -78,6 +79,7 @@ class Order(models.Model):
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
     shipping_address = models.TextField()
     transaction_id = models.CharField(max_length=100, unique=True)
+    paid = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -118,6 +120,18 @@ class Wishlist(models.Model):
     
     def __str__(self):
         return f"Wishlist for {self.user.username}"
+    
+models_ = [
+    Brand,
+    Category,
+    Cart,
+    CartItem,
+    Product,
+    Review,
+    Order,
+    OrderItem,
+    Wishlist
+]
 #url
 '''
 https://github.com/quintuslabs/fashion-cube.git
