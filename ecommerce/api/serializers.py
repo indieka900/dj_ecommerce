@@ -22,7 +22,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class ProductVariantSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductVariant
-        fields = ['size', 'stock', 'variant_price']
+        fields = ['size', 'stock', 'color', 'variant_price']
 
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)  # Nested images
@@ -31,7 +31,7 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = [
-            'id', 'category', 'brand', 'title', 'slug', 'price', 'featured',
+            'id', 'category', 'brand', 'title', 'price', 'featured',
             'discount_price', 'quantity', 'description', 'keywords', 'created_at', 
             'updated_at', 'images', 'variants'
         ]
@@ -41,17 +41,21 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'product', 'user', 'review', 'rating', 'created_at']
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)  # Include product details
+
     class Meta:
         model = OrderItem
-        fields = ['id', 'order', 'product', 'quantity', 'price']
+        fields = ['product', 'quantity', 'price_at_purchase', 'status']
 
 class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True, read_only=True, source='orderitem_set')
-
+    order_items = OrderItemSerializer(many=True, read_only=True)  # Include all order items
+    
     class Meta:
         model = Order
-        fields = ['id', 'user', 'items', 'status', 'total_price', 'shipping_address', 'transaction_id', 'created_at', 'updated_at']
-
+        fields = [
+            'id', 'user', 'status', 'total_price', 'shipping_address', 
+            'transaction_id', 'paid', 'created_at', 'updated_at', 'order_items'
+        ]
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem

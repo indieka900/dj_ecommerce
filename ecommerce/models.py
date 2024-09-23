@@ -60,6 +60,7 @@ class ProductImage(models.Model):
 class ProductVariant(models.Model):
     product = models.ForeignKey(Product, related_name='variants', on_delete=models.CASCADE)
     size = models.CharField(max_length=10, blank=True)
+    color = models.CharField(max_length=20, blank=True)
     stock = models.PositiveIntegerField(default=0)
     variant_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
@@ -94,18 +95,25 @@ class Order(models.Model):
     paid = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
-        return f"Order {self.pk} by {self.user.username}"
+        return f"Order {self.pk} by {self.user.email}"
 
 class OrderItem(models.Model):
-    order = models.ForeignKey(Order, on_delete=models.CASCADE)
+    STATUS_CHOICES = (
+        ("Pending", "Pending"),
+        ("Delivered", "Delivered"),
+        ("Cancelled", "Cancelled")
+    )
+    
+    order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    quantity = models.PositiveIntegerField(default=1)
+    price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)  # Store the price at purchase time
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
     
     def __str__(self):
-        return f"{self.quantity} x {self.product.title} in Order {self.order.pk}"
+        return f"{self.product.title} - {self.status}"
 
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -142,7 +150,9 @@ models_ = [
     Review,
     Order,
     OrderItem,
-    Wishlist
+    Wishlist,
+    ProductVariant,
+    ProductImage
 ]
 #url
 '''
