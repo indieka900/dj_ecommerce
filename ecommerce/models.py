@@ -120,17 +120,24 @@ class Cart(models.Model):
     products = models.ManyToManyField(Product, through='CartItem')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
-        return f"Cart for {self.user.username}"
+        return f"Cart for {self.user.email}"
+
+    def total_price(self):
+        return sum(item.total_item_price() for item in self.cart_items.all())  # assuming cart_items related_name
 
 class CartItem(models.Model):
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     
     def __str__(self):
-        return f"{self.quantity} x {self.product.title} in {self.cart}"
+        return f"{self.quantity} of {self.product.title} in cart for {self.cart.user.email}"
+
+    def total_item_price(self):
+        return self.quantity * self.product.price
+
 
 class Wishlist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
