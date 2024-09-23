@@ -1,7 +1,10 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from ecommerce.models import Brand, Category, Product, Review, Order, Cart, Wishlist
-from .serializers import BrandSerializer, CategorySerializer, ProductSerializer, ReviewSerializer, OrderSerializer, CartSerializer, WishlistSerializer
+from .serializers import (
+    BrandSerializer, CategorySerializer, ProductSerializer, ReviewSerializer, 
+    OrderSerializer, CartSerializer, WishlistSerializer
+)
 
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
@@ -14,7 +17,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+    queryset = Product.objects.prefetch_related('variants', 'images').all()
     serializer_class = ProductSerializer
     permission_classes = [IsAdminUser]
 

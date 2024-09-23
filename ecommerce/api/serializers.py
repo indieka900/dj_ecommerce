@@ -1,5 +1,8 @@
 from rest_framework import serializers
-from ecommerce.models import Brand, Category, Product, Review, Order, OrderItem, Cart, CartItem, Wishlist
+from ecommerce.models import (
+    Brand, Category, Product, Review, Order, 
+    OrderItem, Cart, CartItem, Wishlist, ProductImage, ProductVariant
+)
 
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,11 +14,27 @@ class CategorySerializer(serializers.ModelSerializer):
         model = Category
         fields = ['id', 'category_name', 'slug', 'parent']
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['image', 'alt_text']
+
+class ProductVariantSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductVariant
+        fields = ['size', 'stock', 'variant_price']
+
 class ProductSerializer(serializers.ModelSerializer):
+    images = ProductImageSerializer(many=True, read_only=True)  # Nested images
+    variants = ProductVariantSerializer(many=True, read_only=True)  # Nested variants
+
     class Meta:
         model = Product
-        fields = ['id', 'category', 'brand', 'title', 'slug', 'price', 'discount_price', 'quantity', 'description', 'image', 'keywords', 'created_at', 'updated_at']
-
+        fields = [
+            'id', 'category', 'brand', 'title', 'slug', 'price', 'featured',
+            'discount_price', 'quantity', 'description', 'keywords', 'created_at', 
+            'updated_at', 'images', 'variants'
+        ]
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review

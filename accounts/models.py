@@ -1,13 +1,24 @@
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.core.exceptions import ValidationError
-from django.db import models, transaction
+from django.db import models
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django_otp.oath import TOTP
 from django_otp.util import random_hex
-import time
-from django.conf import settings
-from datetime import timedelta
 
+class UserAdress(models.Model):
+    _id = models.CharField(primary_key=True, editable=False,max_length=255)
+    address_line = models.CharField( max_length=100)
+    city = models.CharField( max_length=70)
+    post_code = models.IntegerField()
+    state = models.CharField( max_length=70)
+    district = models.CharField( max_length=100)
+    county = models.CharField( max_length=60)
+    default = models.BooleanField(default=False)
+    deliveryInstructions = models.TextField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    longitude = models.FloatField(blank=True, null=True)
+    
+    def __str__(self):
+        return f"{self.city} --- {self.county}"
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -40,7 +51,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     first_name = models.CharField(max_length=30, blank=True, null=True)
     last_name = models.CharField(max_length=30, blank=True, null=True)
     phone_number = models.CharField(max_length=15, default='')
-    role = models.CharField(max_length=25, choices=Role_choices, default="Student")
+    role = models.CharField(max_length=25, choices=Role_choices, default="Customer")
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -60,14 +71,14 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
             self.secret = random_hex(20)
         super().save(*args, **kwargs)
 
-    def generate_totp_token(self):
+    '''def generate_totp_token(self):
         totp = TOTP(key=self.otp_secret, digits=6)  # Adjust interval to match the one used in OTPManager
-        return totp.token()
+        return totp.token()'''
 
     
-    def verify_totp_token(self, token):
+    '''def verify_totp_token(self, token):
         totp = TOTP(key=self.otp_secret, digits=6)  # Adjust interval to match the one used in OTPManager
-        return totp.verify(token)
+        return totp.verify(token)'''
 
 
 class Profile(models.Model):
