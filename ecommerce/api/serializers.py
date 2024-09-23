@@ -41,21 +41,27 @@ class ReviewSerializer(serializers.ModelSerializer):
         fields = ['id', 'product', 'user', 'review', 'rating', 'created_at']
 
 class OrderItemSerializer(serializers.ModelSerializer):
-    product = ProductSerializer(read_only=True)  # Include product details
+    product = ProductSerializer(read_only=True)
 
     class Meta:
         model = OrderItem
         fields = ['product', 'quantity', 'price_at_purchase', 'status']
 
 class OrderSerializer(serializers.ModelSerializer):
-    order_items = OrderItemSerializer(many=True, read_only=True)  # Include all order items
-    
+    order_items = OrderItemSerializer(many=True, read_only=True)
+    total_items = serializers.SerializerMethodField()
+
     class Meta:
         model = Order
         fields = [
             'id', 'user', 'status', 'total_price', 'shipping_address', 
-            'transaction_id', 'paid', 'created_at', 'updated_at', 'order_items'
+            'transaction_id', 'paid', 'created_at', 'updated_at', 
+            'order_items', 'total_items'
         ]
+
+    def get_total_items(self, obj):
+        return sum(item.quantity for item in obj.order_items.all())
+    
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem

@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from django.db.models import Sum
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from ecommerce.models import Brand, Category, Product, Review, Order, Cart, Wishlist
 from .serializers import (
@@ -35,6 +36,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
 class OrderViewSet(viewsets.ModelViewSet):
+    queryset = Order.objects.prefetch_related('order_items__product').annotate(
+        total_items=Sum('order_items__quantity')
+    )
     serializer_class = OrderSerializer
     permission_classes = [IsAuthenticated]
 
