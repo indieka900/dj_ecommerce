@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from accounts.models import CustomUser, Profile
+from accounts.utils import OTPManager
 
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
@@ -61,3 +62,22 @@ class CompleteProfileUpdateSerializer(serializers.Serializer):
         profile.save()
 
         return instance
+    
+class VerifyOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    otp = serializers.CharField()
+
+    def validate(self, data):
+        email = data.get('email')
+        otp = data.get('otp')
+        otp = int(otp)
+        
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            raise serializers.ValidationError("Invalid email")
+        
+        if not OTPManager.verify_otp(user, otp):
+            raise serializers.ValidationError("Invalid OTP")
+
+        return {'user': user}

@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from django.contrib.auth import login as auth_login
+from ..signals import send_otp_email
 from rest_framework.decorators import action
 from .serializers import (
     RegistrationSerializer, LoginSerializer, CompleteProfileUpdateSerializer, 
@@ -29,10 +29,10 @@ class UserManagementViewSet(ViewSet):
         serializer = LoginSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.validated_data['user']
-            refresh = RefreshToken.for_user(user)
+            # refresh = RefreshToken.for_user(user)
+            send_otp_email(user)
             return Response({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
+                'message': "OTP was sent, check your email",
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
