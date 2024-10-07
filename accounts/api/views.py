@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from ..signals import send_otp_email
 from rest_framework.decorators import action
 from .serializers import (
-    RegistrationSerializer, LoginSerializer, CompleteProfileUpdateSerializer, 
+    PasswordResetConfirmSerializer, PasswordResetSerializer, RegistrationSerializer, LoginSerializer, CompleteProfileUpdateSerializer, 
     ProfileSerializer, ProfileUpdateSerializer
 )
 
@@ -20,7 +20,7 @@ class UserManagementViewSet(ViewSet):
             user = serializer.save()
             return Response({
                 "message": "User registered successfully.",
-                "user_id": user.id
+                "user": user
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -36,14 +36,38 @@ class UserManagementViewSet(ViewSet):
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['put'], url_path='update-profile', permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get', 'put'], url_path='update-profile', permission_classes=[IsAuthenticated])
     def update_profile(self, request):
-        serializer = CompleteProfileUpdateSerializer(instance=request.user, data=request.data, partial=True)
-        if serializer.is_valid():
-            updated_user = serializer.save()
+        if request.method == 'GET':
+            serializer = ProfileUpdateSerializer(request.user)
+            profile_serializer = ProfileSerializer(request.user.profile)
             return Response({
-                "message": "Profile updated successfully.",
-                "user": ProfileUpdateSerializer(updated_user).data,
-                "profile": ProfileSerializer(updated_user.profile).data
+                "user": serializer.data,
+                "profile": profile_serializer.data
             }, status=status.HTTP_200_OK)
+        elif request.method == 'PUT':
+            serializer = CompleteProfileUpdateSerializer(instance=request.user, data=request.data, partial=True)
+            if serializer.is_valid():
+                updated_user = serializer.save()
+                return Response({
+                    "message": "Profile updated successfully.",
+                    "user": ProfileUpdateSerializer(updated_user).data,
+                    "profile": ProfileSerializer(updated_user.profile).data
+                }, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path='password-reset')
+    def password_reset(self, request):
+        serializer = PasswordResetSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'detail': 'Password reset email sent'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['post'], url_path='password-reset-confirm')
+    def password_reset_confirm(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'detail': 'Password has been reset'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
