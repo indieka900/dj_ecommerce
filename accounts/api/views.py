@@ -7,7 +7,7 @@ from ..signals import send_otp_email
 from rest_framework.decorators import action
 from .serializers import (
     PasswordResetConfirmSerializer, PasswordResetSerializer, RegistrationSerializer, LoginSerializer, CompleteProfileUpdateSerializer, 
-    ProfileSerializer, ProfileUpdateSerializer
+    ProfileSerializer, ProfileUpdateSerializer, TokenSerializer, VerifyOTPSerializer
 )
 
 class UserManagementViewSet(ViewSet):
@@ -35,6 +35,26 @@ class UserManagementViewSet(ViewSet):
                 'message': "OTP was sent, check your email",
             }, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], url_path='verify-otp')
+    def verify_otp(self, request):
+        serializer = VerifyOTPSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        # login(request, user)
+
+        # Generate JWT tokens
+        refresh = RefreshToken.for_user(user)
+        access = refresh.access_token
+
+        token_data = {
+            'refresh': str(refresh),
+            'access': str(access),
+            'user_role': user.role,
+        }
+        token_serializer = TokenSerializer(token_data)
+
+        return Response(token_serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get', 'put'], url_path='update-profile', permission_classes=[IsAuthenticated])
     def update_profile(self, request):

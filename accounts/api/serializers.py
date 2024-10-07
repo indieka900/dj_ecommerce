@@ -145,4 +145,12 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
         user = self.validated_data['user']
         new_password = self.validated_data['new_password']
         user.set_password(new_password)
-        user.save()        
+        user.save()  
+        
+class TokenSerializer(serializers.Serializer):
+    """
+    Serializer for handling JWT tokens.
+    """
+    refresh = serializers.CharField()
+    access = serializers.CharField()
+    user_role = serializers.CharField()      
