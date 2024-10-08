@@ -40,34 +40,34 @@ class LoginSerializer(serializers.Serializer):
 class ProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ('first_name', 'last_name', 'phone_number', 'role')
+        fields = ('email', 'first_name', 'last_name', 'phone_number', 'role')
 
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ('country', 'city', 'street_address', 'profile_picture')
-
 class CompleteProfileUpdateSerializer(serializers.Serializer):
     user = ProfileUpdateSerializer()
     profile = ProfileSerializer()
 
     def update(self, instance, validated_data):
-        user_data = validated_data.get('user', {})
-        profile_data = validated_data.get('profile', {})
+        # Extract the nested data
+        user_data = validated_data.pop('user', {})
+        profile_data = validated_data.pop('profile', {})
 
-        # Update the User fields
+        # Update CustomUser instance
+        user_instance = instance  # instance here refers to the CustomUser instance
         for attr, value in user_data.items():
-            setattr(instance, attr, value)
-        instance.save()
+            setattr(user_instance, attr, value)
+        user_instance.save()
 
-        # Update the Profile fields
-        profile = instance.profile
-        for attr, value in profile_data.items():
-            setattr(profile, attr, value)
-        profile.save()
+        # Update Profile instance
+        # profile_instance = instance.profile  # This fetches the related Profile instance
+        # for attr, value in profile_data.items():
+        #     setattr(profile_instance, attr, value)
+        # profile_instance.save()
 
-        return instance
-    
+        return instance 
 class VerifyOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField()

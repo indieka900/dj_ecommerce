@@ -59,21 +59,25 @@ class UserManagementViewSet(ViewSet):
     @action(detail=False, methods=['get', 'put'], url_path='update-profile', permission_classes=[IsAuthenticated])
     def update_profile(self, request):
         if request.method == 'GET':
-            serializer = ProfileUpdateSerializer(request.user)
-            profile_serializer = ProfileSerializer(request.user.profile)
+            # Serialize the current user and profile information
+            user_serializer = ProfileUpdateSerializer(request.user)
+            # profile_serializer = ProfileSerializer(request.user.profile)
             return Response({
-                "user": serializer.data,
-                "profile": profile_serializer.data
+                "user": user_serializer.data,
+                # "profile": profile_serializer.data
             }, status=status.HTTP_200_OK)
+
         elif request.method == 'PUT':
+            # Handle the profile update
             serializer = CompleteProfileUpdateSerializer(instance=request.user, data=request.data, partial=True)
             if serializer.is_valid():
                 updated_user = serializer.save()
                 return Response({
                     "message": "Profile updated successfully.",
                     "user": ProfileUpdateSerializer(updated_user).data,
-                    "profile": ProfileSerializer(updated_user.profile).data
+                    # "profile": ProfileSerializer(updated_user.profile).data
                 }, status=status.HTTP_200_OK)
+
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['post'], url_path='password-reset')
