@@ -45,3 +45,7 @@ def login_user(request):
         else:
             messages.error(request, 'Incorrect password')
             return redirect('/')
+        
+def error_404_view(request, exception):
+   
+    return render(request, '404.html')
