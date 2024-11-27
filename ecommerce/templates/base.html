@@ -81,9 +81,20 @@
                                         Checkout</a>
                                 </li>
                                 <li>
-                                    <a href="account.html">
-                                        <i class="fas fa-sign-in-alt u-s-m-r-9"></i>
-                                        Login / Signup</a>
+                                    
+                                    {% if user.is_authenticated %}
+                                        <a href="{% url 'logout' %}">
+                                            <i class="fas fa-sign-in-alt u-s-m-r-9"></i>
+                                            Logout
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'account' %}">
+                                            <i class="fas fa-sign-in-alt u-s-m-r-9"></i>
+                                            Login / Signup
+                                        </a>
+                                    {% endif %}
+                                        
+                                    
                                 </li>
                             </ul>
                         </li>

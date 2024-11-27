@@ -10,18 +10,19 @@
                     <div class="login-wrapper">
                         <h2 class="account-h2 u-s-m-b-20">Login</h2>
                         <h6 class="account-h6 u-s-m-b-30">Welcome back! Sign in to your account.</h6>
-                        <form>
+                        <form method="post" action="{% url 'login' %}">
+                            {% csrf_token %}
                             <div class="u-s-m-b-30">
-                                <label for="user-name-email">Username or Email
+                                <label for="user-name-email">Email
                                     <span class="astk">*</span>
                                 </label>
-                                <input type="text" id="user-name-email" class="text-field" placeholder="Username / Email">
+                                <input type="email" id="user-name-email" name="email" class="text-field" placeholder="Email">
                             </div>
                             <div class="u-s-m-b-30">
                                 <label for="login-password">Password
                                     <span class="astk">*</span>
                                 </label>
-                                <input type="text" id="login-password" class="text-field" placeholder="Password">
+                                <input type="password" name="password" id="login-password" class="text-field" placeholder="Password">
                             </div>
                             <div class="group-inline u-s-m-b-30">
                                 <div class="group-1">
@@ -30,7 +31,7 @@
                                 </div>
                                 <div class="group-2 text-right">
                                     <div class="page-anchor">
-                                        <a href="lost-password.html">
+                                        <a href="#">
                                             <i class="fas fa-circle-o-notch u-s-m-r-9"></i>Lost your password?</a>
                                     </div>
                                 </div>
@@ -47,24 +48,37 @@
                     <div class="reg-wrapper">
                         <h2 class="account-h2 u-s-m-b-20">Register</h2>
                         <h6 class="account-h6 u-s-m-b-30">Registering for this site allows you to access your order status and history.</h6>
-                        <form>
+                        <form method="post" action="{% url 'account' %}">
+                            {% csrf_token %}
                             <div class="u-s-m-b-30">
-                                <label for="user-name">Username
+                                <label for="user-name">First Name
                                     <span class="astk">*</span>
                                 </label>
-                                <input type="text" id="user-name" class="text-field" placeholder="Username">
+                                <input type="text" id="user-name" name="first_name" class="text-field" placeholder="First Name" required>
+                            </div>
+                            <div class="u-s-m-b-30">
+                                <label for="user-name">Phone
+                                    <span class="astk">*</span>
+                                </label>
+                                <input type="phone" id="user-name" name="phone_number" class="text-field" placeholder="Phone" required>
                             </div>
                             <div class="u-s-m-b-30">
                                 <label for="email">Email
                                     <span class="astk">*</span>
                                 </label>
-                                <input type="text" id="email" class="text-field" placeholder="Email">
+                                <input type="text" id="email" name="email" class="text-field" placeholder="Email" required>
                             </div>
                             <div class="u-s-m-b-30">
                                 <label for="password">Password
                                     <span class="astk">*</span>
                                 </label>
-                                <input type="text" id="password" class="text-field" placeholder="Password">
+                                <input type="password" id="password" name="password1" class="text-field" placeholder="Password" required>
+                            </div>
+                            <div class="u-s-m-b-30">
+                                <label for="password">Confirm Password
+                                    <span class="astk">*</span>
+                                </label>
+                                <input type="password" id="password" name="password2" class="text-field" placeholder="Password" required>
                             </div>
                             <div class="u-s-m-b-30">
                                 <input type="checkbox" class="check-box" id="accept">

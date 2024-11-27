@@ -16,7 +16,7 @@ def send_registration_email(user):
     message = f'Hi {user.first_name},\n\nThank you for registering with us. Your account has been successfully created.'
     from_email = settings.DEFAULT_FROM_EMAIL
     recipient_list = [user.email]
-    send_mail(subject, message, from_email, recipient_list)
+    # send_mail(subject, message, from_email, recipient_list)
 
 def send_otp_email(user : CustomUser):
     otp = OTPManager.generate_otp(user)
@@ -25,7 +25,7 @@ def send_otp_email(user : CustomUser):
     from_email = settings.DEFAULT_FROM_EMAIL
     recipient_list = [user.email]
     print(f"{otp} ---- {user.email}")
-    send_mail(subject, message, from_email, recipient_list)
+    # send_mail(subject, message, from_email, recipient_list)
 
 @receiver(post_save, sender=User)
 def user_created(sender, instance, created, **kwargs):
@@ -38,4 +38,4 @@ def user_logged_in_handler(sender, request, user, **kwargs):
     # Store OTP in session or database
     request.session['login_otp'] = otp
     request.session['login_otp_timestamp'] = datetime.now().timestamp()
-    send_otp_email(user, otp)
+    send_otp_email(user)
