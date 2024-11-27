@@ -59,15 +59,15 @@
             <nav>
               <ul class="primary-nav g-nav">
                 <li>
-                  <a href="tel:+111444989">
+                  <a href="tel:{{app_data.tel_no}}">
                     <i class="fas fa-phone u-c-brand u-s-m-r-9"></i>
-                    Telephone:+111-444-989</a
+                    Telephone:{{app_data.tel_no}}</a
                   >
                 </li>
                 <li>
-                  <a href="mailto:contact@domain.com">
+                  <a href="mailto:{{app_data.email}}">
                     <i class="fas fa-envelope u-c-brand u-s-m-r-9"></i>
-                    E-mail: contact@domain.com
+                    E-mail: {{app_data.email}}
                   </a>
                 </li>
               </ul>
@@ -152,9 +152,9 @@
             <div class="row clearfix align-items-center">
               <div class="col-lg-3 col-md-9 col-sm-6">
                 <div class="brand-logo text-lg-center">
-                  <a href="home.html">
+                  <a href="">
                     <img
-                      src="images/main-logo/groover-branding-1.png"
+                      src="{{app_data.logo.url}}"
                       alt="Groover Brand Logo"
                       class="app-brand-logo"
                     />
@@ -177,14 +177,16 @@
                       >
                       <select class="select-box" id="select-category">
                         <option selected="selected" value="">All</option>
-                        <option value="">Men's Clothing</option>
-                        <option value="">Women's Clothing</option>
+                        {% for category in categories %}
+                        <option value="{{category}}">{{category.category_name}}</option>
+                        {% endfor %}
+                        <!-- <option value="">Women's Clothing</option>
                         <option value="">Toys Hobbies & Robots</option>
                         <option value="">Mobiles & Tablets</option>
                         <option value="">Consumer Electronics</option>
                         <option value="">Books & Audible</option>
                         <option value="">Beauty & Health</option>
-                        <option value="">Furniture Home & Office</option>
+                        <option value="">Furniture Home & Office</option> -->
                       </select>
                     </div>
                   </div>
@@ -199,7 +201,7 @@
                 <nav>
                   <ul class="mid-nav g-nav">
                     <li class="u-d-none-lg">
-                      <a href="home.html">
+                      <a href="/">
                         <i class="ion ion-md-home"></i>
                       </a>
                     </li>
@@ -211,8 +213,8 @@
                     <li>
                       <a id="mini-cart-trigger">
                         <i class="ion ion-md-basket"></i>
-                        <span class="item-counter">4</span>
-                        <span class="item-price">$220.00</span>
+                        <span class="item-counter">{{total_items}}</span>
+                        <span class="item-price">KSH{{total_price}}</span>
                       </a>
                     </li>
                   </ul>

@@ -195,6 +195,8 @@ class WishlistItem(models.Model):
         return f"{self.product.title} in {self.wishlist.user.email}'s wishlist"
     
 models_ = [
+    AppContent,
+    Slider,
     Brand,
     Category,
     Cart,
