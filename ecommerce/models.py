@@ -3,6 +3,28 @@ from accounts.models import CustomUser as User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
 
+
+class AppContent(models.Model):
+    title = models.CharField(max_length=15)
+    logo = models.ImageField(upload_to='app_logos/')
+    banner = models.ImageField(upload_to='banners')
+    tel_no = models.CharField(max_length=20)
+    email = models.EmailField()
+    created_at = models.DateField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return self.title
+    
+class Slider(models.Model):
+    app = models.ForeignKey(AppContent, on_delete=models.CASCADE)
+    title = models.CharField(max_length=20)
+    subtitle = models.CharField(max_length=25)
+    image = models.ImageField(upload_to='app_siders/')
+    
+    def __str__(self):
+        return self.title
+    
 class Brand(models.Model):
     brand_title = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(unique=True, blank=True)
