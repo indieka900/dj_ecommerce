@@ -45,6 +45,21 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def calculate_selling_price(self, custom_discount=None):
+        discount = custom_discount if custom_discount is not None else self.discount_price
+        
+        if discount < 0 or discount > 100:
+            raise ValueError("Discount percentage must be between 0 and 100")
+        
+        discount_amount = self.price * (discount / 100)
+        selling_price = self.price - discount_amount
+        
+        return round(selling_price, 2)
+    
+    @property
+    def current_selling_price(self):
+        return self.calculate_selling_price()
+
 
     def __str__(self):
         return self.title

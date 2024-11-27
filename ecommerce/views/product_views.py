@@ -8,8 +8,9 @@ def home(request):
     context = {
         'featured_products': featured_products,
         'categories': categories,
+        'path' : 'home',
     }
-    return render(request, 'ecommerce/home.html', context)
+    return render(request, 'home.html', context)
 
 def product_list(request):
     products = Product.objects.all()
