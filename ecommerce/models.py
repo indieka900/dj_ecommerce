@@ -37,21 +37,31 @@ class Brand(models.Model):
     def __str__(self):
         return self.brand_title
 
-class Category(models.Model):
-    category_name = models.CharField(max_length=50, unique=True)
+class ParentCategory(models.Model):
+    parent_name = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(unique=True, blank=True)
-    parent = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='children')
     
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.category_name)
+            self.slug = slugify(self.parent_name)
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return self.category_name
+        return self.parent_name
+    
+    class Meta:
+        verbose_name_plural = "Parent Categories"
+        
+class Category(models.Model):
+    category_name = models.CharField(max_length=50)
+    parent_category = models.ForeignKey(ParentCategory, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.category_name} for {self.parent_category.parent_name}"
     
     class Meta:
         verbose_name_plural = "Categories"
+        unique_together = ['category_name', 'parent_category']
 
 class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
@@ -60,15 +70,17 @@ class Product(models.Model):
     # slug = models.SlugField(unique=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     featured = models.BooleanField(default=False)
-    discount_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    discount = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=0)
     description = models.TextField()
+    prod_img = models.ImageField(upload_to='prod_images/')
     keywords = models.TextField()
+    rating = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def calculate_selling_price(self, custom_discount=None):
-        discount = custom_discount if custom_discount is not None else self.discount_price
+        discount = custom_discount if custom_discount is not None else self.discount
         
         if discount < 0 or discount > 100:
             raise ValueError("Discount percentage must be between 0 and 100")
@@ -199,6 +211,7 @@ models_ = [
     Slider,
     Brand,
     Category,
+    ParentCategory,
     Cart,
     CartItem,
     Product,
