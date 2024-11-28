@@ -1078,10 +1078,14 @@
             <ul class="bread-crumb">
               <li class="has-separator">
                 <i class="ion ion-md-home"></i>
-                <a href="home.html">Home</a>
+                <a href="/">Home</a>
               </li>
               <li class="is-marked">
-                <a href="about.html">About</a>
+                <a href="">
+                {% block page %}
+                  
+                {% endblock page %}
+                  </a>
               </li>
             </ul>
           </div>
