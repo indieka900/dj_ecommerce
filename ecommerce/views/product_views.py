@@ -1,6 +1,9 @@
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
-from ..models import Product, Category, AppContent, Slider, Wishlist, Cart
+from ..models import (
+    Product, Category, AppContent, Slider, Wishlist, Cart,
+    ProductImage
+)
 
 def common_data(request):
     app_data = AppContent.objects.all().first()
@@ -28,10 +31,10 @@ def common_data(request):
     }
 
 def home(request):
-    featured_products = Product.objects.filter(featured=True)[:4]
+    latest_products = Product.objects.all()[:4]
     categories = Category.objects.all()[:3]
     context = {
-        'featured_products': featured_products,
+        'latest_products': latest_products,
         'categories': categories,
         'path' : 'home',
         **common_data(request)
@@ -50,7 +53,10 @@ def product_list(request):
 
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
+    p_images = ProductImage.objects.filter(product=product)
     context = {
         'product': product,
+        'images' : p_images,
+        **common_data(request)
     }
-    return render(request, 'ecommerce/product_detail.html', context)
+    return render(request, 'single-product.html', context)

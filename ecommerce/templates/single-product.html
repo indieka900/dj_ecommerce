@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block contet %}
+{% block content %}
     
     <div class="page-detail u-s-p-t-80">
         <div class="container">
@@ -8,26 +8,16 @@
                 <div class="col-lg-6 col-md-6 col-sm-12">
                     <!-- Product-zoom-area -->
                     <div class="zoom-area">
-                        <img id="zoom-pro" class="img-fluid" src="images/product/product@4x.jpg" data-zoom-image="images/product/product@4x.jpg" alt="Zoom Image">
+                        <img id="zoom-pro" class="img-fluid" src="{{ product.prod_img.url }}" data-zoom-image="{{ product.prod_img.url }}" alt="Zoom Image">
                         <div id="gallery" class="u-s-m-t-10">
-                            <a class="active" data-image="images/product/product@4x.jpg" data-zoom-image="images/product/product@4x.jpg">
-                                <img src="images/product/product@2x.jpg" alt="Product">
+                            <a class="active" data-image="{{ product.prod_img.url }}" data-zoom-image="{{ product.prod_img.url }}">
+                                <img src="{{ product.prod_img.url }}" alt="Product">
                             </a>
-                            <a data-image="images/product/product@4x.jpg" data-zoom-image="images/product/product@4x.jpg">
-                                <img src="images/product/product@2x.jpg" alt="Product">
-                            </a>
-                            <a data-image="images/product/product@4x.jpg" data-zoom-image="images/product/product@4x.jpg">
-                                <img src="images/product/product@2x.jpg" alt="Product">
-                            </a>
-                            <a data-image="images/product/product@4x.jpg" data-zoom-image="images/product/product@4x.jpg">
-                                <img src="images/product/product@2x.jpg" alt="Product">
-                            </a>
-                            <a data-image="images/product/product@4x.jpg" data-zoom-image="images/product/product@4x.jpg">
-                                <img src="images/product/product@2x.jpg" alt="Product">
-                            </a>
-                            <a data-image="images/product/product@4x.jpg" data-zoom-image="images/product/product@4x.jpg">
-                                <img src="images/product/product@2x.jpg" alt="Product">
-                            </a>
+                            {% for image in images %}
+                                <a data-image="{{ image.image.url }}" data-zoom-image="{{ image.image.url }}">
+                                    <img src="{{ image.image.url }}" alt="Product">
+                                </a>
+                            {% endfor %}
                         </div>
                     </div>
                     <!-- Product-zoom-area /- -->
@@ -38,51 +28,47 @@
                         <div class="section-1-title-breadcrumb-rating">
                             <div class="product-title">
                                 <h1>
-                                    <a href="single-product.html">Casual Hoodie Full Cotton</a>
+                                    <a href="">{{product.title}}</a>
                                 </h1>
                             </div>
                             <ul class="bread-crumb">
                                 <li class="has-separator">
-                                    <a href="home.html">Home</a>
+                                    <a href="/">Home</a>
                                 </li>
                                 <li class="has-separator">
-                                    <a href="shop-v1-root-category.html">Men's Clothing</a>
-                                </li>
-                                <li class="has-separator">
-                                    <a href="shop-v2-sub-category.html">Tops</a>
+                                    <a href="shop-v1-root-category.html">{{ product.category.parent_category.parent_name }}</a>
                                 </li>
                                 <li class="is-marked">
-                                    <a href="shop-v3-sub-sub-category.html">Hoodies</a>
+                                    <a href="shop-v2-sub-category.html">{{ product.category.category_name }}</a>
                                 </li>
                             </ul>
                             <div class="product-rating">
                                 <div class='star' title="4.5 out of 5 - based on 23 Reviews">
                                     <span style='width:67px'></span>
                                 </div>
-                                <span>(23)</span>
+                                <span>({{product.rating}})</span>
                             </div>
                         </div>
                         <div class="section-2-short-description u-s-p-y-14">
                             <h6 class="information-heading u-s-m-b-8">Description:</h6>
-                            <p>This hoodie is full cotton. It includes a muff sewn onto the lower front, and (usually) a drawstring to adjust the hood opening. Throughout the U.S., it is common for middle-school, high-school, and college students to wear this sweatshirts—with or without hoods—that display their respective school names or mascots across the chest, either as part of a uniform or personal preference.
-                            </p>
+                            <p>{{product.description}}</p>
                         </div>
                         <div class="section-3-price-original-discount u-s-p-y-14">
                             <div class="price">
-                                <h4>$55.00</h4>
+                                <h4>KSH{{ product.current_selling_price }}</h4>
                             </div>
                             <div class="original-price">
                                 <span>Original Price:</span>
-                                <span>$60.00</span>
+                                <span>KSH{{ product.price }}</span>
                             </div>
                             <div class="discount-price">
                                 <span>Discount:</span>
-                                <span>8%</span>
+                                <span>{{product.discount}}%</span>
                             </div>
-                            <div class="total-save">
+                            <!-- <div class="total-save">
                                 <span>Save:</span>
                                 <span>$5</span>
-                            </div>
+                            </div> -->
                         </div>
                         <div class="section-4-sku-information u-s-p-y-14">
                             <h6 class="information-heading u-s-m-b-8">Sku Information:</h6>
@@ -92,7 +78,7 @@
                             </div>
                             <div class="left">
                                 <span>Only:</span>
-                                <span>50 left</span>
+                                <span>{{product.quantity}} left</span>
                             </div>
                         </div>
                         <div class="section-5-product-variants u-s-p-y-14">
@@ -203,10 +189,8 @@
                             <!-- Description-Tab -->
                             <div class="tab-pane fade active show" id="description">
                                 <div class="description-whole-container">
-                                    <p class="desc-p u-s-m-b-26">This hoodie is full cotton. It includes a muff sewn onto the lower front, and (usually) a drawstring to adjust the hood opening. Throughout the U.S., it is common for middle-school, high-school, and college students to wear this sweatshirts—with or without hoods—that display their respective school names or mascots across the chest, either as part of a uniform or personal preference.
-                                    </p>
-                                    <img class="desc-img img-fluid u-s-m-b-26" src="images/product/product@3x.jpg" alt="Product">
-                                    <iframe class="desc-iframe u-s-m-b-45" width="710" height="400" src="images/product/iframe-youtube.jpg" allowfullscreen></iframe>
+                                    <p class="desc-p u-s-m-b-26">{{ product.description}}</p>
+                                    <img class="desc-img img-fluid u-s-m-b-26" src="{{ product.prod_img.url }}" alt="Product">
                                 </div>
                             </div>
                             <!-- Description-Tab /- -->

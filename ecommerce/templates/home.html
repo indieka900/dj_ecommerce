@@ -26,10 +26,11 @@
                         <div class="tab-pane active show fade" id="men-latest-products">
                             <div class="slider-fouc">
                                 <div class="products-slider owl-carousel" data-item="4">
+                                    {% for item in latest_products %}
                                     <div class="item">
                                         <div class="image-container">
-                                            <a class="item-img-wrapper-link" href="single-product.html">
-                                                <img class="img-fluid" src="images/product/product@3x.jpg" alt="Product">
+                                            <a class="item-img-wrapper-link" href="/product/{{item.id}}/">
+                                                <img class="img-fluid" src="{{ item.prod_img.url }}" alt="Product">
                                             </a>
                                             <div class="item-action-behaviors">
                                                 <a class="item-quick-look" data-toggle="modal" href="#quick-view">Quick Look
@@ -43,31 +44,31 @@
                                             <div class="what-product-is">
                                                 <ul class="bread-crumb">
                                                     <li class="has-separator">
-                                                        <a href="shop-v1-root-category.html">Men's</a>
+                                                        <a href="shop-v1-root-category.html">{{ item.category.parent_category.parent_name }}</a>
                                                     </li>
                                                     <li class="has-separator">
-                                                        <a href="shop-v2-sub-category.html">Tops</a>
+                                                        <a href="shop-v2-sub-category.html">{{ item.category.category_name }}</a>
                                                     </li>
                                                     <li>
                                                         <a href="shop-v3-sub-sub-category.html">Hoodies</a>
                                                     </li>
                                                 </ul>
                                                 <h6 class="item-title">
-                                                    <a href="single-product.html">Casual Hoodie Full Cotton</a>
+                                                    <a href="/product/{{item.id}}/">{{ item.title }}</a>
                                                 </h6>
                                                 <div class="item-stars">
                                                     <div class='star' title="0 out of 5 - based on 0 Reviews">
                                                         <span style='width:0'></span>
                                                     </div>
-                                                    <span>(0)</span>
+                                                    <span>({{ item.rating }})</span>
                                                 </div>
                                             </div>
                                             <div class="price-template">
                                                 <div class="item-new-price">
-                                                    $55.00
+                                                    KSH{{ item.current_selling_price }}
                                                 </div>
                                                 <div class="item-old-price">
-                                                    $60.00
+                                                    KSH{{ item.price }}
                                                 </div>
                                             </div>
                                         </div>
@@ -75,6 +76,7 @@
                                             <span>NEW</span>
                                         </div>
                                     </div>
+                                    {% endfor %}
                                     <div class="item">
                                         <div class="image-container">
                                             <a class="item-img-wrapper-link" href="single-product.html">
