@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from ..models import (
     Product, Category, AppContent, Slider, Wishlist, Cart,
-    ProductImage
+    ProductImage, ProductVariant
 )
 
 def common_data(request):
@@ -54,9 +54,15 @@ def product_list(request):
 def product_detail(request, pk):
     product = get_object_or_404(Product, pk=pk)
     p_images = ProductImage.objects.filter(product=product)
+    s_products = Product.objects.filter(category=product.category)
+    variants = ProductVariant.objects.filter(product=product)
+    unique_colors = list(set(variant.color for variant in variants if variant.color))
     context = {
         'product': product,
         'images' : p_images,
+        'similar_products' : s_products,
+        'variants' : variants,
+        'unique_colors': unique_colors,
         **common_data(request)
     }
     return render(request, 'single-product.html', context)
