@@ -8,25 +8,25 @@ from ..models import (
 def common_data(request):
     app_data = AppContent.objects.all().first()
     sliders = Slider.objects.filter(app=app_data)
-    # cart = Cart.objects.get(user=request.user)
+    cart = Cart.objects.get(user=request.user)
     
-    # # Fetch cart items with related products
-    # cart_items = cart.cart_items.select_related('product')
+    # Fetch cart items with related products
+    cart_items = cart.cart_items.select_related('product')
     
-    # # Calculate total items
-    # total_items = cart_items.count()
+    # Calculate total items
+    total_items = cart_items.count()
     
-    # # Calculate total price
-    # total_price = sum(
-    #     item.product.calculate_selling_price() 
-    #     for item in cart_items
-    # )
+    # Calculate total price
+    total_price = sum(
+        item.product.calculate_selling_price() * item.quantity
+        for item in cart_items
+    )
     return {
         'app_data': app_data,
         'sliders' : sliders,
         'categories' : Category.objects.all(),
-        # 'total_items' : total_items, 
-        # 'total_price' : total_price,
+        'total_items' : total_items, 
+        'total_price' : total_price,
         # 'pages': Page.objects.all(),
     }
 
