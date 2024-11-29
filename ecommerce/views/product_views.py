@@ -8,6 +8,7 @@ from ..models import (
 def common_data(request):
     app_data = AppContent.objects.all().first()
     sliders = Slider.objects.filter(app=app_data)
+    total_price = 0
     try:
         cart = Cart.objects.get(user=request.user)
         cart_items = cart.cart_items.select_related('product').all()
@@ -21,7 +22,7 @@ def common_data(request):
         cart_items = []
     
     # Calculate total items
-    total_items = cart_items.count()
+    total_items = cart_items.count() if cart_items else 0
     
     return {
         'app_data': app_data,
