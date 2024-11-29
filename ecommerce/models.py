@@ -1,7 +1,9 @@
 from django.db import models
+from django.forms import ValidationError
 from accounts.models import CustomUser as User
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 
 class AppContent(models.Model):
@@ -166,7 +168,6 @@ class OrderItem(models.Model):
 
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product, through='CartItem')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -180,12 +181,48 @@ class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
+    size = models.CharField(max_length=15, blank=True, null=True)
+    color = models.CharField(max_length=30, blank=True, null=True)
+    added_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Added At'))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_('Updated At'))
+
+    class Meta:
+        verbose_name = _('Cart Item')
+        verbose_name_plural = _('Cart Items')
+        unique_together = [['cart', 'product']]
+        ordering = ['-added_at']
+        indexes = [
+            models.Index(fields=['cart', 'product']),
+            models.Index(fields=['added_at']),
+        ]
     
     def __str__(self):
         return f"{self.quantity} of {self.product.title} in cart for {self.cart.user.email}"
 
     def total_item_price(self):
         return self.quantity * self.product.price
+    
+    @property
+    def total_price(self):
+        """
+        Calculate total price for this cart item
+        """
+        return self.product.price * self.quantity
+
+    def save(self, *args, **kwargs):
+        """
+        Override save method to ensure quantity is always positive
+        """
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def clean(self):
+        """
+        Validate cart item before saving
+        """
+        # Check product availability
+        if self.product.quantity < self.quantity:
+            raise ValidationError(_('Requested quantity exceeds available stock'))
 
 
 class Wishlist(models.Model):
