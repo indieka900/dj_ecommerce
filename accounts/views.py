@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .models import CustomUser
 from django.views.generic import CreateView
 from accounts.forms import UserSignUpForm
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 
 
@@ -46,6 +46,11 @@ def login_user(request):
             messages.error(request, 'Incorrect password')
             return redirect('/')
         
+def logout_user(request):
+    logout(request)
+    return redirect('account')
+        
 def error_404_view(request, exception):
    
     return render(request, '404.html')
+

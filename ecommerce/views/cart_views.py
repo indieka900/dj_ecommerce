@@ -43,7 +43,7 @@ class CartService:
         
         return cart_item
 
-@login_required
+@login_required(login_url='account')
 def add_to_cart_view(request, product_id):
     if request.method == 'POST':
         print(request.POST)
@@ -62,7 +62,7 @@ def add_to_cart_view(request, product_id):
         
         return redirect('cart_detail')
 
-@login_required
+@login_required(login_url='account')
 def cart_detail(request):
     try:
         cart = Cart.objects.get(user=request.user)
