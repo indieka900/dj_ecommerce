@@ -189,7 +189,7 @@ class CartItem(models.Model):
     class Meta:
         verbose_name = _('Cart Item')
         verbose_name_plural = _('Cart Items')
-        unique_together = [['cart', 'product']]
+        unique_together = ['cart', 'product', 'size', 'color']
         ordering = ['-added_at']
         indexes = [
             models.Index(fields=['cart', 'product']),
@@ -200,7 +200,7 @@ class CartItem(models.Model):
         return f"{self.quantity} of {self.product.title} in cart for {self.cart.user.email}"
 
     def total_item_price(self):
-        return self.quantity * self.product.price
+        return self.quantity * self.product.current_selling_price
     
     @property
     def total_price(self):

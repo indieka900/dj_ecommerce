@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from ..models import Cart, CartItem, Product
+from .product_views import common_data
 from django.db import transaction
 from django.core.exceptions import ValidationError
 
@@ -18,8 +19,6 @@ class CartService:
         
         # Get or create user's cart
         cart, _ = Cart.objects.get_or_create(user=user)
-        
-        
         try:
             cart_item = CartItem.objects.get(
                 cart=cart, 
@@ -36,8 +35,6 @@ class CartService:
                 size=size,
                 color=color
             )
-        
-        
         cart_item.full_clean()
         cart_item.save()
         
@@ -76,7 +73,8 @@ def cart_detail(request):
         context = {
             'cart_items': cart_items,  
             'total_price': total_price,
-            'cart': cart
+            'cart': cart,
+            **common_data(request)
         }
         
         template = 'cart.html' if cart_items.exists() else 'cart-empty.html'
@@ -84,3 +82,4 @@ def cart_detail(request):
     
     except Cart.DoesNotExist:
         return render(request, 'cart-empty.html')
+    

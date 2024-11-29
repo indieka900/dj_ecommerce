@@ -8,23 +8,26 @@ from ..models import (
 def common_data(request):
     app_data = AppContent.objects.all().first()
     sliders = Slider.objects.filter(app=app_data)
-    cart = Cart.objects.get(user=request.user)
+    try:
+        cart = Cart.objects.get(user=request.user)
+        cart_items = cart.cart_items.select_related('product').all()
+        
+        total_price = cart.total_price() if cart_items.exists() else 0
+        
+        # template = 'cart.html' if cart_items.exists() else 'cart-empty.html'
+        # return render(request, template, context)
     
-    # Fetch cart items with related products
-    cart_items = cart.cart_items.select_related('product')
+    except Cart.DoesNotExist:
+        cart_items = []
     
     # Calculate total items
     total_items = cart_items.count()
     
-    # Calculate total price
-    total_price = sum(
-        item.product.calculate_selling_price() * item.quantity
-        for item in cart_items
-    )
     return {
         'app_data': app_data,
         'sliders' : sliders,
         'categories' : Category.objects.all(),
+        'cart_items' : cart_items,
         'total_items' : total_items, 
         'total_price' : total_price,
         # 'pages': Page.objects.all(),
