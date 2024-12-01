@@ -1,5 +1,4 @@
 from django.shortcuts import get_object_or_404, render, redirect
-from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from ..models import Cart, CartItem, Product
@@ -43,6 +42,48 @@ class CartService:
         product.save()
         
         return cart_item
+    
+    @classmethod
+    @transaction.atomic
+    def update_cart_item(cls, cart_item:CartItem, new_quantity):
+        
+        product = cart_item.product
+        
+        # Validate quantity
+        if new_quantity < 1:
+            raise ValidationError("Quantity must be at least 1.")
+        
+        # Check if enough product is available
+        available_quantity = product.quantity + cart_item.quantity
+        if new_quantity > available_quantity:
+            raise ValidationError(f"Only {available_quantity} items available.")
+        
+        # Calculate quantity difference
+        qty_diff = new_quantity - cart_item.quantity
+        
+        # Update product and cart item quantities
+        product.quantity -= qty_diff
+        cart_item.quantity = new_quantity
+        
+        # Save changes
+        product.save()
+        cart_item.save()
+        
+        return cart_item
+
+    @classmethod
+    @transaction.atomic
+    def remove_cart_item(cls, cart_item:CartItem):
+        product = cart_item.product
+        
+        # Return product quantity back to inventory
+        product.quantity += cart_item.quantity
+        product.save()
+        
+        # Delete the cart item
+        cart_item.delete()
+        
+        return product
 
 @login_required(login_url='account')
 def add_to_cart_view(request, product_id):
@@ -84,20 +125,16 @@ def cart_detail(request):
     except Cart.DoesNotExist:
         return render(request, 'cart-empty.html')
     
-@transaction.atomic
+@login_required(login_url='account')
 def update_cartItem(request, pk):
     try:
-        # Fetch cart item and associated product with select_for_update to prevent race conditions
+        # Fetch cart item 
         cart_item = get_object_or_404(CartItem, pk=pk)
-        product = cart_item.product
 
         if request.method == 'POST':
             # Handle deletion
             if "delete" in request.POST:
-                # Return product quantity back to inventory
-                product.quantity += cart_item.quantity
-                product.save()
-                cart_item.delete()
+                product = CartService.remove_cart_item(cart_item)
                 messages.success(request, f"{product.title} removed from cart.")
                 return redirect('cart_detail')
 
@@ -106,29 +143,13 @@ def update_cartItem(request, pk):
                 try:
                     new_qty = int(request.POST['quantity'])
                     
-                    # Validate quantity
-                    if new_qty < 1:
-                        messages.error(request, "Quantity must be at least 1.")
-                        return redirect('cart_detail')
+                    # Use the service method to update cart item
+                    updated_cart_item = CartService.update_cart_item(cart_item, new_qty)
                     
-                    # Check if enough product is available
-                    if new_qty > (product.quantity + cart_item.quantity):
-                        messages.error(request, f"Only {product.quantity + cart_item.quantity} items available.")
-                        return redirect('cart_detail')
-                    
-                    # Calculate quantity difference
-                    qty_diff = new_qty - cart_item.quantity
-                    
-                    # Update product and cart item quantities
-                    product.quantity -= qty_diff
-                    cart_item.quantity = new_qty
-                    
-                    # Save changes
-                    product.save()
-                    cart_item.save()
-                    
-                    messages.success(request, f"{product.title} quantity updated to {new_qty}.")
+                    messages.success(request, f"{updated_cart_item.product.title} quantity updated to {new_qty}.")
                 
+                except ValidationError as e:
+                    messages.error(request, str(e))
                 except ValueError:
                     messages.error(request, "Invalid quantity entered.")
     
@@ -137,3 +158,4 @@ def update_cartItem(request, pk):
         messages.error(request, f"An error occurred: {str(e)}")
     
     return redirect('cart_detail')
+    
