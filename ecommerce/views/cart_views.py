@@ -1,4 +1,5 @@
 from django.shortcuts import get_object_or_404, render, redirect
+from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from ..models import Cart, CartItem, Product
@@ -83,3 +84,56 @@ def cart_detail(request):
     except Cart.DoesNotExist:
         return render(request, 'cart-empty.html')
     
+@transaction.atomic
+def update_cartItem(request, pk):
+    try:
+        # Fetch cart item and associated product with select_for_update to prevent race conditions
+        cart_item = get_object_or_404(CartItem, pk=pk)
+        product = cart_item.product
+
+        if request.method == 'POST':
+            # Handle deletion
+            if "delete" in request.POST:
+                # Return product quantity back to inventory
+                product.quantity += cart_item.quantity
+                product.save()
+                cart_item.delete()
+                messages.success(request, f"{product.title} removed from cart.")
+                return redirect('cart_detail')
+
+            # Handle quantity update
+            if "update" in request.POST:
+                try:
+                    new_qty = int(request.POST['quantity'])
+                    
+                    # Validate quantity
+                    if new_qty < 1:
+                        messages.error(request, "Quantity must be at least 1.")
+                        return redirect('cart_detail')
+                    
+                    # Check if enough product is available
+                    if new_qty > (product.quantity + cart_item.quantity):
+                        messages.error(request, f"Only {product.quantity + cart_item.quantity} items available.")
+                        return redirect('cart_detail')
+                    
+                    # Calculate quantity difference
+                    qty_diff = new_qty - cart_item.quantity
+                    
+                    # Update product and cart item quantities
+                    product.quantity -= qty_diff
+                    cart_item.quantity = new_qty
+                    
+                    # Save changes
+                    product.save()
+                    cart_item.save()
+                    
+                    messages.success(request, f"{product.title} quantity updated to {new_qty}.")
+                
+                except ValueError:
+                    messages.error(request, "Invalid quantity entered.")
+    
+    except Exception as e:
+        # Log the error or handle it appropriately
+        messages.error(request, f"An error occurred: {str(e)}")
+    
+    return redirect('cart_detail')

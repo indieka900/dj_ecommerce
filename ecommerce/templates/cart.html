@@ -2,13 +2,16 @@
 {% block page %}
 Cart
 {% endblock %}
+{% block page1 %}
+Cart
+{% endblock %}
 {% block content %}
 <!-- Cart-Page -->
 <div class="page-cart u-s-p-t-80">
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <form>
+                <!-- <form method="post"> -->
                     <!-- Products-List-Wrapper -->
                     <div class="table-wrapper u-s-m-b-60">
                         <table>
@@ -22,48 +25,57 @@ Cart
                                 </tr>
                             </thead>
                             <tbody>
-                                
+
                                 {% for item in cart_items %}
-                                   <tr>
-                                    <td>
-                                        <div class="cart-anchor-image">
-                                            <a href="{% url 'product_detail' item.product.id %}">
-                                                <img src="{{item.product.prod_img.url}}" alt="Product">
-                                                <h6>{{item.product.title}}</h6>
-                                            </a>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="cart-price">
-                                            Ksh {{item.product.current_selling_price}}
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="cart-quantity">
-                                            <div class="quantity">
-                                                <input type="text" class="quantity-text-field" value="{{item.quantity}}">
-                                                <a class="plus-a" data-max="{{item.product.quantity}}">&#43;</a>
-                                                <a class="minus-a" data-min="1">&#45;</a>
+                                <form action="{% url 'cart_item' item.id %}" method="post" class="post-form">
+                                    {% csrf_token %}
+                                    <tr>
+                                        <td>
+                                            <div class="cart-anchor-image">
+                                                <a href="{% url 'product_detail' item.product.id %}">
+                                                    <img src="{{item.product.prod_img.url}}" alt="Product">
+                                                    <h6>{{item.product.title}}</h6>
+                                                </a>
                                             </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <h6> 
-                                        {% if item.size %}{{item.size}} -- {% endif %}
-                                        
-                                        {% if item.color %} {{item.color}}{% endif %}
-                                        </h6>
-                                            
-                                    </td>
-                                    <td>
-                                        <div class="action-wrapper">
-                                            <button class="button button-outline-secondary fas fa-sync"></button>
-                                            <button class="button button-outline-secondary fas fa-trash"></button>
-                                        </div>
-                                    </td>
-                                </tr> 
+                                        </td>
+                                        <td>
+                                            <div class="cart-price">
+                                                Ksh {{item.product.current_selling_price}}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cart-quantity">
+                                                <div class="quantity">
+                                                    <input type="text" name="quantity" class="quantity-text-field"
+                                                        value="{{item.quantity}}">
+                                                    <a class="plus-a" data-max="{{item.product.quantity}}">&#43;</a>
+                                                    <a class="minus-a" data-min="1">&#45;</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6>
+                                                {% if item.size %}{{item.size}} -- {% endif %}
+
+                                                {% if item.color %} {{item.color}}{% endif %}
+                                            </h6>
+
+                                        </td>
+                                        <td>
+                                            <div class="action-wrapper">
+
+                                                <button name="update"
+                                                    class="button button-outline-secondary fas fa-sync update-cart-item"></button>
+                                                <button name="delete"
+                                                    class="button button-outline-secondary fas fa-trash update-cart-item"></button>
+                                                <!-- <a href="{% url 'cart_item' item.id %}"
+                                                class="button button-outline-secondary fas fa-trash"></a> -->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </form>
                                 {% endfor %}
-                                    
+
                             </tbody>
                         </table>
                     </div>
@@ -84,7 +96,7 @@ Cart
                         </div>
                     </div>
                     <!-- Coupon /- -->
-                </form>
+                <!-- </form> -->
                 <!-- Billing -->
                 <div class="calculation u-s-m-b-60">
                     <div class="table-wrapper-2">
@@ -186,6 +198,7 @@ Cart
     </div>
 </div>
 <!-- Cart-Page /- -->
+
 {% endblock %}
 
 <!-- Footer -->
