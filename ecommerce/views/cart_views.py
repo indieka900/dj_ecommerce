@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from ..models import Cart, CartItem, Product
+from ..models import Cart, CartItem, Product, Review
 from .product_views import common_data
 from django.db import transaction
 from django.core.exceptions import ValidationError
@@ -158,4 +158,28 @@ def update_cartItem(request, pk):
         messages.error(request, f"An error occurred: {str(e)}")
     
     return redirect('cart_detail')
+
+def addReview(request, product_id):
+    product = get_object_or_404(Product, pk=product_id)
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            user = request.user
+            email = user.email
+            name = user.first_name
+        else:
+            name = request.POST['name']
+            email = request.POST['email']
+        review_title = request.POST['review_title']
+        review = request.POST['review']
+        rating = float(request.POST['rating'])
+        rev = Review(
+            product=product,
+            name = name,
+            email = email,
+            review_title = review_title,
+            review = review,
+            rating = rating
+        )
+        rev.save()
+        return redirect(f'/product/{product_id}/')
     
