@@ -180,7 +180,7 @@ Product-Detail
               <a class="nav-link" data-toggle="tab" href="#specification">Specifications</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-toggle="tab" href="#review">Reviews (15)</a>
+              <a class="nav-link" data-toggle="tab" href="#review">Reviews ({{reviews|length}})</a>
             </li>
           </ul>
         </div>
@@ -367,7 +367,7 @@ Product-Detail
                   <div class="review-option-heading">
                     <h6>
                       Reviews
-                      <span> (15) </span>
+                      <span> ({{reviews|length}}) </span>
                     </h6>
                   </div>
                   <div class="review-option-box">
@@ -383,21 +383,26 @@ Product-Detail
                 <!-- Review-Options /- -->
                 <!-- All-Reviews -->
                 <div class="reviewers">
+                  
+                  {% for review in reviews %}
+                    
                   <div class="review-data">
                     <div class="reviewer-name-and-date">
-                      <h6 class="reviewer-name">John</h6>
-                      <h6 class="review-posted-date">10 May 2018</h6>
+                      <h6 class="reviewer-name">{{review.name}}</h6>
+                      <h6 class="review-posted-date">{{review.created_at}}</h6>
                     </div>
                     <div class="reviewer-stars-title-body">
                       <div class="reviewer-stars">
                         <div class="star">
-                          <span style="width: 67px"></span>
+                          <span style="width: {{review.rating_percentage}}px"></span>
                         </div>
-                        <span class="review-title">Good!</span>
+                        <span class="review-title">{{review.review_title}}</span>
                       </div>
-                      <p class="review-body">Good Quality...!</p>
+                      <p class="review-body">{{review.review}}</p>
                     </div>
+                    
                   </div>
+                  {% endfor %}
                   <div class="review-data">
                     <div class="reviewer-name-and-date">
                       <h6 class="reviewer-name">Doe</h6>
