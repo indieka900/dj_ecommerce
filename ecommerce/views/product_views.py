@@ -9,20 +9,23 @@ def common_data(request):
     app_data = AppContent.objects.all().first()
     sliders = Slider.objects.filter(app=app_data)
     total_price = 0
-    try:
-        cart = Cart.objects.get(user=request.user)
-        cart_items = cart.cart_items.select_related('product').all()
+    cart_items = []
+    total_items = 0
+    if request.user.is_authenticated:
+        try:
+            cart = Cart.objects.get(user=request.user)
+            cart_items = cart.cart_items.select_related('product').all()
+            
+            total_price = cart.total_price() if cart_items.exists() else 0
+            
+            # template = 'cart.html' if cart_items.exists() else 'cart-empty.html'
+            # return render(request, template, context)
         
-        total_price = cart.total_price() if cart_items.exists() else 0
-        
-        # template = 'cart.html' if cart_items.exists() else 'cart-empty.html'
-        # return render(request, template, context)
+        except Cart.DoesNotExist:
+            cart_items = []
     
-    except Cart.DoesNotExist:
-        cart_items = []
-    
-    # Calculate total items
-    total_items = cart_items.count() if cart_items else 0
+        # Calculate total items
+        total_items = cart_items.count() if cart_items else 0
     
     return {
         'app_data': app_data,

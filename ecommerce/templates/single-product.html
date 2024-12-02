@@ -116,7 +116,7 @@ Product-Detail
             </div>
             <div class="section-6-social-media-quantity-actions u-s-p-y-14">
               <div class="quick-social-media-wrapper u-s-m-b-22">
-                <span>Share:</span>
+                <!-- <span>Share:</span>
                 <ul class="social-media-list">
                   <li>
                     <a href="#">
@@ -143,7 +143,7 @@ Product-Detail
                       <i class="fab fa-pinterest"></i>
                     </a>
                   </li>
-                </ul>
+                </ul> -->
               </div>
               <div class="quantity-wrapper u-s-m-b-22">
                 <span>Quantity:</span>
@@ -157,8 +157,8 @@ Product-Detail
                 <button class="button button-outline-secondary" type="submit">
                   Add to cart
                 </button>
-                <button class="button button-outline-secondary far fa-heart u-s-m-l-6"></button>
-                <button class="button button-outline-secondary far fa-envelope u-s-m-l-6"></button>
+                <!-- <button class="button button-outline-secondary far fa-heart u-s-m-l-6"></button> -->
+                <!-- <button class="button button-outline-secondary far fa-envelope u-s-m-l-6"></button> -->
               </div>
           </form>
         </div>
@@ -321,31 +321,38 @@ Product-Detail
                     <h6 class="review-h6">
                       Have you used this product before?
                     </h6>
+                    <form action="{% url 'add_review' product.id %}" method="post">
+                      {% csrf_token %}
                     <div class="star-wrapper u-s-m-b-8">
                       <div class="star">
                         <span id="your-stars" style="width: 0"></span>
                       </div>
                       <label for="your-rating-value"></label>
-                      <input id="your-rating-value" type="text" class="text-field" placeholder="0.0" />
+                      <input id="your-rating-value" type="text" name="rating" class="text-field" placeholder="0.0" />
                       <span id="star-comment"></span>
                     </div>
-                    <form>
+                      
+                      {% if user.is_authenticated  %}
+                       {% else %}
+                        
+                      
                       <label for="your-name">Name
                         <span class="astk"> *</span>
                       </label>
-                      <input id="your-name" type="text" class="text-field" placeholder="Your Name" />
+                      <input id="your-name" name="name" type="text" class="text-field" placeholder="Your Name" />
                       <label for="your-email">Email
                         <span class="astk"> *</span>
                       </label>
-                      <input id="your-email" type="text" class="text-field" placeholder="Your Email" />
+                      <input id="your-email" type="text" name="email" class="text-field" placeholder="Your Email" />
+                      {% endif %}
                       <label for="review-title">Review Title
                         <span class="astk"> *</span>
                       </label>
-                      <input id="review-title" type="text" class="text-field" placeholder="Review Title" />
+                      <input id="review-title" type="text" name="review_title" class="text-field" placeholder="Review Title" />
                       <label for="review-text-area">Review
                         <span class="astk"> *</span>
                       </label>
-                      <textarea class="text-area u-s-m-b-8" id="review-text-area" placeholder="Review"></textarea>
+                      <textarea class="text-area u-s-m-b-8" id="review-text-area" name="review" placeholder="Review"></textarea>
                       <button class="button button-outline-secondary">
                         Submit Review
                       </button>
