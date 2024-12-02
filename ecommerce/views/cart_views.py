@@ -88,7 +88,6 @@ class CartService:
 @login_required(login_url='account')
 def add_to_cart_view(request, product_id):
     if request.method == 'POST':
-        print(request.POST)
         try:
             product = Product.objects.get(id=product_id)
             cart_item = CartService.add_to_cart(
