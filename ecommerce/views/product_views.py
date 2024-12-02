@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Avg
 from django.core.paginator import Paginator
 from ..models import (
     Product, Category, AppContent, Slider, Wishlist, Cart,
@@ -64,10 +65,12 @@ def product_detail(request, pk):
     s_products = Product.objects.filter(category=product.category)
     variants = ProductVariant.objects.filter(product=product)
     reviews = Review.objects.filter(product=product)
+    avarage_rating = round(sum(review.rating for review in reviews) / len(reviews), 1)
     unique_colors = list(set(variant.color for variant in variants if variant.color))
     context = {
         'product': product,
         'reviews' : reviews,
+        'average_rating' : avarage_rating,
         'images' : p_images,
         'similar_products' : s_products,
         'variants' : variants,

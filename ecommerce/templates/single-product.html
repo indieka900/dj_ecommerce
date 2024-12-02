@@ -269,9 +269,9 @@ Product-Detail
                   <div class="total-score-wrapper">
                     <h6 class="review-h6">Average Rating</h6>
                     <div class="circle-wrapper">
-                      <h1>4.5</h1>
+                      <h1>{{average_rating}}</h1>
                     </div>
-                    <h6 class="review-h6">Based on 23 Reviews</h6>
+                    <h6 class="review-h6">Based on {{reviews | length}} Review{{ reviews|pluralize }}</h6>
                   </div>
                 </div>
                 <div class="col-lg-6 col-md-6">
@@ -403,66 +403,6 @@ Product-Detail
                     
                   </div>
                   {% endfor %}
-                  <div class="review-data">
-                    <div class="reviewer-name-and-date">
-                      <h6 class="reviewer-name">Doe</h6>
-                      <h6 class="review-posted-date">10 June 2018</h6>
-                    </div>
-                    <div class="reviewer-stars-title-body">
-                      <div class="reviewer-stars">
-                        <div class="star">
-                          <span style="width: 67px"></span>
-                        </div>
-                        <span class="review-title">Well done!</span>
-                      </div>
-                      <p class="review-body">Cotton is good.</p>
-                    </div>
-                  </div>
-                  <div class="review-data">
-                    <div class="reviewer-name-and-date">
-                      <h6 class="reviewer-name">Tim</h6>
-                      <h6 class="review-posted-date">10 July 2018</h6>
-                    </div>
-                    <div class="reviewer-stars-title-body">
-                      <div class="reviewer-stars">
-                        <div class="star">
-                          <span style="width: 67px"></span>
-                        </div>
-                        <span class="review-title">Well done!</span>
-                      </div>
-                      <p class="review-body">Excellent condition</p>
-                    </div>
-                  </div>
-                  <div class="review-data">
-                    <div class="reviewer-name-and-date">
-                      <h6 class="reviewer-name">Johnny</h6>
-                      <h6 class="review-posted-date">10 March 2018</h6>
-                    </div>
-                    <div class="reviewer-stars-title-body">
-                      <div class="reviewer-stars">
-                        <div class="star">
-                          <span style="width: 67px"></span>
-                        </div>
-                        <span class="review-title">Bright!</span>
-                      </div>
-                      <p class="review-body">Cotton</p>
-                    </div>
-                  </div>
-                  <div class="review-data">
-                    <div class="reviewer-name-and-date">
-                      <h6 class="reviewer-name">Alexia C. Marshall</h6>
-                      <h6 class="review-posted-date">12 May 2018</h6>
-                    </div>
-                    <div class="reviewer-stars-title-body">
-                      <div class="reviewer-stars">
-                        <div class="star">
-                          <span style="width: 67px"></span>
-                        </div>
-                        <span class="review-title">Well done!</span>
-                      </div>
-                      <p class="review-body">Good polyester Cotton</p>
-                    </div>
-                  </div>
                 </div>
                 <!-- All-Reviews /- -->
                 <!-- Pagination-Review -->
