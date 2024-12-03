@@ -65,7 +65,7 @@ def product_detail(request, pk):
     s_products = Product.objects.filter(category=product.category)
     variants = ProductVariant.objects.filter(product=product)
     reviews = Review.objects.filter(product=product)
-    avarage_rating = round(sum(review.rating for review in reviews) / len(reviews), 1)
+    avarage_rating = round(sum(review.rating for review in reviews) / len(reviews), 1) if reviews else 0.0
     unique_colors = list(set(variant.color for variant in variants if variant.color))
     context = {
         'product': product,

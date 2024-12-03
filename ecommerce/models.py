@@ -217,9 +217,6 @@ class CartItem(models.Model):
         return self.product.price * self.quantity
 
     def save(self, *args, **kwargs):
-        """
-        Override save method to ensure quantity is always positive
-        """
         self.full_clean()
         return super().save(*args, **kwargs)
 
@@ -234,9 +231,7 @@ class CartItem(models.Model):
 
 class Wishlist(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product, through='WishlistItem')
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"Wishlist for {self.user.email}"
@@ -246,6 +241,9 @@ class WishlistItem(models.Model):
     wishlist = models.ForeignKey(Wishlist, on_delete=models.CASCADE, related_name='wishlist_items')
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ['wishlist', 'product']
 
     def __str__(self):
         return f"{self.product.title} in {self.wishlist.user.email}'s wishlist"

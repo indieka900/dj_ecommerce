@@ -74,7 +74,7 @@
                       My Cart</a>
                   </li>
                   <li>
-                    <a href="wishlist.html">
+                    <a href="{% url 'wishlist' %}">
                       <i class="far fa-heart u-s-m-r-9"></i>
                       My Wishlist</a>
                   </li>
@@ -173,7 +173,7 @@
                     </a>
                   </li>
                   <li class="u-d-none-lg">
-                    <a href="wishlist.html">
+                    <a href="{% url 'wishlist' %}">
                       <i class="far fa-heart"></i>
                     </a>
                   </li>
@@ -197,7 +197,7 @@
           <button type="button" class="button fas fa-search" id="responsive-search"></button>
         </div>
         <div class="fixed-responsive-wrapper">
-          <a href="wishlist.html">
+          <a href="{% url 'wishlist' %}">
             <i class="far fa-heart"></i>
             <span class="fixed-item-counter">4</span>
           </a>
@@ -745,7 +745,7 @@
                         <a href="account.html">My Account</a>
                       </li>
                       <li>
-                        <a href="wishlist.html">Wishlist</a>
+                        <a href="{% url 'wishlist' %}">Wishlist</a>
                       </li>
                       <li>
                         <a href="track-order.html">Track your Order</a>

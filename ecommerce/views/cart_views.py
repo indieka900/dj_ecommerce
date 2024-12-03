@@ -88,20 +88,23 @@ class CartService:
 @login_required(login_url='account')
 def add_to_cart_view(request, product_id):
     if request.method == 'POST':
-        try:
-            product = Product.objects.get(id=product_id)
-            cart_item = CartService.add_to_cart(
-                user=request.user,
-                product=product,
-                quantity=int(request.POST.get('quantity', 1)),
-                size=request.POST.get('size'),
-                color=request.POST.get('color')
-            )
-            messages.success(request, "Product added to cart!")
-        except ValidationError as e:
-            messages.error(request, str(e))
+        if 'add-to-cart' in request.POST:
+            try:
+                product = Product.objects.get(id=product_id)
+                cart_item = CartService.add_to_cart(
+                    user=request.user,
+                    product=product,
+                    quantity=int(request.POST.get('quantity', 1)),
+                    size=request.POST.get('size'),
+                    color=request.POST.get('color')
+                )
+                messages.success(request, "Product added to cart!")
+            except ValidationError as e:
+                messages.error(request, str(e))
         
-        return redirect('cart_detail')
+            return redirect('cart_detail')
+        elif 'add-to-wishlist' in request.POST:
+            return redirect(f'/add-wishlist/{product_id}/')
 
 @login_required(login_url='account')
 def cart_detail(request):
