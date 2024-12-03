@@ -12,6 +12,7 @@ class AppContent(models.Model):
     banner = models.ImageField(upload_to='banners')
     tel_no = models.CharField(max_length=20)
     email = models.EmailField()
+    favIcon = models.FileField(upload_to='fav-icons/', blank=True, null=True)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
