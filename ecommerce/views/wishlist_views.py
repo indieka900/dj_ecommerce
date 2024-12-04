@@ -49,8 +49,13 @@ def wishlist_detail(request):
 @login_required(login_url='account')
 def delete_wishlist_item(request, pk):
     try:
-        w_item = get_list_or_404(WishlistItem, pk=pk)
-        w_item.delete()
+        w_item = get_object_or_404(WishlistItem, pk=pk)
+        if request.method == "POST":
+            if "delete" in request.POST:
+                w_item.delete()
+            if "add-to-cart" in request.POST:
+                CartService.add_to_cart(request.user, w_item.product)
+                return redirect('cart_detail')
     except:
         pass
     

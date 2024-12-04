@@ -23,40 +23,46 @@ Wishlist
                             </tr>
                         </thead>
                         <tbody>
-                            
+
                             {% for item in w_items %}
-                            <tr>
-                                <td>
-                                    <div class="cart-anchor-image">
-                                        <a href="{% url 'product_detail' item.product.id %}">
-                                            <img src="{{item.product.prod_img.url}}" alt="Product">
-                                            <h6>{{item.product.title}}</h6>
-                                        </a>
-                                    </div>
+                        
+                            <form action="/del-wishlist-item/{{item.id}}/" method="post">
+                                {% csrf_token %}
+                                <tr>
+                                    <td>
+                                        <div class="cart-anchor-image">
+                                            <a href="{% url 'product_detail' item.product.id %}">
+                                                <img src="{{item.product.prod_img.url}}" alt="Product">
+                                                <h6>{{item.product.title}}</h6>
+                                            </a>
+                                        </div>
                                     </td>
                                     <td>
                                         <div class="cart-price">
                                             Ksh {{item.product.current_selling_price}}
                                         </div>
                                     </td>
-                                <td>
-                                    <div class="cart-stock">
-                                        
-                                        {% if item.product.quantity > 0 %}
+                                    <td>
+                                        <div class="cart-stock">
+
+                                            {% if item.product.quantity > 0 %}
                                             In
-                                        {% else %}
+                                            {% else %}
                                             Out off
-                                        {% endif %}
-                                             Stock
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="action-wrapper">
-                                        <button name="add-to-cart" class="button button-outline-secondary">Add to Cart</button>
-                                        <button name="delete" class="button button-outline-secondary fas fa-trash"></button>
-                                    </div>
-                                </td>
-                            </tr>
+                                            {% endif %}
+                                            Stock
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="action-wrapper">
+                                            <button name="add-to-cart" class="button button-outline-secondary">Add to
+                                                Cart</button>
+                                            <button name="delete"
+                                                class="button button-outline-secondary fas fa-trash"></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </form>
                             {% endfor %}
                         </tbody>
                     </table>
