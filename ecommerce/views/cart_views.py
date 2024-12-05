@@ -2,88 +2,9 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from ..models import Cart, CartItem, Product, Review
-from .product_views import common_data
-from django.db import transaction
+from .services import CartService, CommonService
 from django.core.exceptions import ValidationError
 
-class CartService:
-    """
-    Service class to handle cart-related operations
-    """
-    @classmethod
-    @transaction.atomic
-    def add_to_cart(cls, user, product : Product, quantity=1, size=None, color=None):
-        
-        if product.quantity < quantity:
-            raise ValidationError("Insufficient product quantity")
-        
-        # Get or create user's cart
-        cart, _ = Cart.objects.get_or_create(user=user)
-        try:
-            cart_item = CartItem.objects.get(
-                cart=cart, 
-                product=product, 
-                size=size, 
-                color=color
-            )
-            cart_item.quantity += quantity
-        except CartItem.DoesNotExist:
-            cart_item = CartItem(
-                cart=cart, 
-                product=product, 
-                quantity=quantity,
-                size=size,
-                color=color
-            )
-        cart_item.full_clean()
-        cart_item.save()
-        
-        product.quantity -= quantity
-        product.save()
-        
-        return cart_item
-    
-    @classmethod
-    @transaction.atomic
-    def update_cart_item(cls, cart_item:CartItem, new_quantity):
-        
-        product = cart_item.product
-        
-        # Validate quantity
-        if new_quantity < 1:
-            raise ValidationError("Quantity must be at least 1.")
-        
-        # Check if enough product is available
-        available_quantity = product.quantity + cart_item.quantity
-        if new_quantity > available_quantity:
-            raise ValidationError(f"Only {available_quantity} items available.")
-        
-        # Calculate quantity difference
-        qty_diff = new_quantity - cart_item.quantity
-        
-        # Update product and cart item quantities
-        product.quantity -= qty_diff
-        cart_item.quantity = new_quantity
-        
-        # Save changes
-        product.save()
-        cart_item.save()
-        
-        return cart_item
-
-    @classmethod
-    @transaction.atomic
-    def remove_cart_item(cls, cart_item:CartItem):
-        product = cart_item.product
-        
-        # Return product quantity back to inventory
-        product.quantity += cart_item.quantity
-        product.save()
-        
-        # Delete the cart item
-        cart_item.delete()
-        
-        return product
 
 @login_required(login_url='account')
 def add_to_cart_view(request, product_id):
@@ -91,7 +12,7 @@ def add_to_cart_view(request, product_id):
         if 'add-to-cart' in request.POST:
             try:
                 product = Product.objects.get(id=product_id)
-                cart_item = CartService.add_to_cart(
+                CartService.add_to_cart(
                     user=request.user,
                     product=product,
                     quantity=int(request.POST.get('quantity', 1)),
@@ -118,7 +39,7 @@ def cart_detail(request):
             'cart_items': cart_items,  
             'total_price': total_price,
             'cart': cart,
-            **common_data(request)
+            **CommonService.get_common_context(request)
         }
         
         template = 'cart.html' if cart_items.exists() else 'cart-empty.html'
