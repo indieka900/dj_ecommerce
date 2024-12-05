@@ -1,0 +1,52 @@
+<div class="item">
+    <div class="image-container">
+        <a class="item-img-wrapper-link" href="/product/{{item.id}}/">
+            <img class="img-fluid" src="{{ item.prod_img.url }}" alt="Product">
+        </a>
+        <div class="item-action-behaviors">
+            <!-- <a class="item-quick-look" data-toggle="modal" href="#quick-view">Quick Look
+                                                                                            </a> -->
+            <a class="item-mail" href="javascript:void(0)">Mail</a>
+            <a class="item-addwishlist" href="{% url 'add-to-wishlist' item.id %}">Add
+                to Wishlist</a>
+            <a class="item-addCart" href="{% url 'add_to_cart' item.id %}">Add to
+                Cart</a>
+        </div>
+    </div>
+    <div class="item-content">
+        <div class="what-product-is">
+            <ul class="bread-crumb">
+                <li class="has-separator">
+                    <a href="shop-v1-root-category.html">
+                        {{item.category.parent_category.parent_name }}
+                    </a>
+                </li>
+                <li class="has-separator">
+                    <a href="shop-v2-sub-category.html">
+                        {{ item.category.category_name}}
+                    </a>
+                </li>
+            </ul>
+            <h6 class="item-title">
+                <a href="/product/{{item.id}}/">{{ item.title }}</a>
+            </h6>
+            <div class="item-stars">
+                <div class='star' title="0 out of 5 - based on 0 Reviews">
+                    <span style='width: 20px;'></span>
+                </div>
+                <span>({{ item.rating }})</span>
+            </div>
+        </div>
+        <div class="price-template">
+            <div class="item-new-price">
+                KSH{{ item.current_selling_price }}
+            </div>
+            <div class="item-old-price">
+                KSH{{ item.price }}
+            </div>
+        </div>
+    </div>
+    <div class="tag new">
+        <span>NEW</span>
+    </div>
+</div>
