@@ -1092,6 +1092,41 @@
     </style>
   </noscript>
   <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
+   <script>
+    function addToCart(productId) {
+      // Prevent default link behavior
+      event.preventDefault();
+
+      // Set the product ID in the hidden form
+      document.getElementById('cart-product-id').value = productId;
+
+      // Get the CSRF token
+      const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+      // Send POST request
+      fetch("{% url 'add_to_cart' product_id=0 %}".replace('0', productId), {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'X-CSRFToken': csrfToken
+        },
+        body: `product_id=${productId}`
+      })
+        .then(response => {
+          if (response.ok) {
+            // You can add a success message or update cart icon here
+            alert('Product added to cart!');
+          } else {
+            // Handle error
+            alert('Failed to add product to cart');
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert('An error occurred while adding the product to cart');
+        });
+    }
+  </script>
   <script>
     window.ga = function () {
       ga.q.push(arguments);
