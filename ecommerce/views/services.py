@@ -3,6 +3,7 @@ from django.db.models.functions import Cast
 from django.core.paginator import Paginator
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.shortcuts import get_list_or_404
 from ..models import (
     Product, Category, AppContent, Slider, Wishlist, Cart,CartItem,
     ParentCategory, Review, WishlistItem
@@ -322,6 +323,16 @@ class ProductService:
         
         """
         return Category.objects.all()[:limit]
+    
+    @classmethod
+    def get_featured_products(cls):
+        """
+        Retrieve featured products.
+        
+        """
+        # prds = get_list_or_404(Product, featured=True)
+        prds = Product.objects.filter(featured=True)
+        return prds if prds else []
     
 class CartService:
     """

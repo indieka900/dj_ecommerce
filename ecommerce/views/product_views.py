@@ -8,10 +8,12 @@ def home(request):
     """
     context = {
         'latest_products': ProductService.get_latest_products(),
+        'featured_products' : ProductService.get_featured_products(),
         'categories': ProductService.get_featured_categories(),
         'path': 'home',
         **CommonService.get_common_context(request)
     }
+    print(context)
     return render(request, 'home.html', context)
 
 def product_list(request):
@@ -29,6 +31,7 @@ def product_list(request):
         'paginator': paginator,
         **CommonService.get_common_context(request)
     }
+    print(context)
     
     return render(request, 'ecommerce/product_list.html', context)
 
