@@ -62,7 +62,6 @@ def directory(request):
             to_attr='subcategories'
         )
     )
-    print(parent_categories)
     context = {
         'parent_categories' : parent_categories,
         **CommonService.get_common_context(request)
@@ -70,11 +69,23 @@ def directory(request):
     return render(request, 'store-directory.html', context)
 
 def products_by_parent_c(request, slug):
-    products, paginator, parent_catogory = ProductService.get_products_by_parent_category(slug)
+    page_number = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 2)
+    
+    # Retrieve products with pagination
+    products, paginator, parent_category = ProductService.get_products_by_parent_category(
+        slug, 
+        page_number=page_number, 
+        per_page=int(per_page)
+    )
+    
+    # Check if page is out of range
+    if products is None:
+        return render(request, 'error.html', {'message': 'Category not found'})
     context = {
         'products' : products,
         'paginator' : paginator,
-        'cgry_title' : parent_catogory.parent_name,
+        'cgry_title' : parent_category.parent_name,
         **CommonService.get_common_context(request)
     }
     return render(request, 'shop-v1-root-category.html', context)

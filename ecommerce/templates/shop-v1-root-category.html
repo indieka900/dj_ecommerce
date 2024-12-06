@@ -239,12 +239,21 @@ Category
                         <div class="toolbar-sorter-2">
                             <div class="select-box-wrapper">
                                 <label class="sr-only" for="show-records">Show Records Per Page</label>
-                                <select class="select-box" id="show-records">
-                                    <option selected="selected" value="">Show: 8</option>
-                                    <option value="">Show: 16</option>
-                                    <option value="">Show: 28</option>
+                                <select class="select-box" id="show-records" onchange="changePageSize(this.value)">
+                                    <option value="8" {% if request.GET.per_page == '8' %}selected{% endif %}>Show: 8</option>
+                                    <option value="16" {% if request.GET.per_page == '16' %}selected{% endif %}>Show: 16</option>
+                                    <option value="28" {% if request.GET.per_page == '28' %}selected{% endif %}>Show: 28</option>
                                 </select>
                             </div>
+                            
+                            <script>
+                                function changePageSize(perPage) {
+                                    // Get current URL and modify per_page parameter
+                                    const url = new URL(window.location.href);
+                                    url.searchParams.set('per_page', perPage);
+                                    window.location.href = url.toString();
+                                }
+                            </script>
                         </div>
                         <!-- //end Toolbar Sorter 2  -->
                     </div>
