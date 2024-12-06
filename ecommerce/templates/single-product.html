@@ -42,10 +42,10 @@ Product-Detail
                 <a href="/">Home</a>
               </li>
               <li class="has-separator">
-                <a href="shop-v1-root-category.html">{{ product.category.parent_category.parent_name }}</a>
+                <a href="/products/{{product.category.parent_category.slug}}/">{{ product.category.parent_category.parent_name }}</a>
               </li>
               <li class="is-marked">
-                <a href="shop-v2-sub-category.html">{{ product.category.category_name }}</a>
+                <a href="/products/{{product.category.parent_category.slug}}/{{product.category.category_name}}/">{{ product.category.category_name }}</a>
               </li>
             </ul>
             <div class="product-rating">
