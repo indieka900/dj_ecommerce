@@ -67,7 +67,7 @@ class Category(models.Model):
         unique_together = ['category_name', 'parent_category']
 
 class Product(models.Model):
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, related_name='product')
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=100)
     # slug = models.SlugField(unique=True, blank=True)

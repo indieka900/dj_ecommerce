@@ -73,11 +73,14 @@ def products_by_parent_c(request, slug):
     per_page = request.GET.get('per_page', 2)
     
     # Retrieve products with pagination
-    products, paginator, parent_category = ProductService.get_products_by_parent_category(
+    products, paginator, parent_category, categories = ProductService.get_products_by_parent_category(
         slug, 
         page_number=page_number, 
         per_page=int(per_page)
     )
+    print("Categories:")
+    for category in categories:
+        print(f"{category.category_name}: {category.product_count} products")
     
     # Check if page is out of range
     if products is None:
@@ -85,6 +88,7 @@ def products_by_parent_c(request, slug):
     context = {
         'products' : products,
         'paginator' : paginator,
+        'categor' : categories,
         'cgry_title' : parent_category.parent_name,
         **CommonService.get_common_context(request)
     }

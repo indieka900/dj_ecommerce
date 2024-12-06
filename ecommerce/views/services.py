@@ -102,12 +102,6 @@ class ProductService:
     def get_products_by_parent_category(cls, parent_category_slug, page_number=1, per_page=12):
         """
         Retrieve products for a specific parent category.
-        
-        Args:
-            parent_category_slug (str): Slug of the parent category
-            page_number (int): Current page number
-            per_page (int): Number of products per page
-        
         Returns:
             tuple: Paginated products, paginator, and parent category
         """
@@ -120,14 +114,19 @@ class ProductService:
                 category__parent_category=parent_category
             ).select_related('category', 'brand')
             
-            # Apply pagination
+            categories = Category.objects.filter(
+                parent_category=parent_category
+            ).annotate(
+                product_count=Count('product', filter=Q(product__isnull=False))
+            )
+            
             paginator = Paginator(products, per_page)
             page_obj = paginator.get_page(page_number)
             
-            return page_obj, paginator, parent_category
+            return page_obj, paginator, parent_category, categories
         
         except ParentCategory.DoesNotExist:
-            return None, None, None
+            return None, None, None, None
 
     @classmethod
     def filter_products(cls, 

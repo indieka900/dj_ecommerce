@@ -19,192 +19,20 @@ Category
                     <!-- Fetch-Categories-from-Root-Category  -->
                     <div class="fetch-categories">
                         <h3 class="title-name">Browse Categories</h3>
-                        <!-- Level-2 -->
-                        <h3 class="fetch-mark-category">
-                            <a href="shop-v2-sub-category.html">Tops
-                                <span class="total-fetch-items">(5)</span>
-                            </a>
-                        </h3>
-                        <!-- Level-2 /- -->
                         <!-- Level-3 -->
                         <ul>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">T-Shirts
-                                    <span class="total-fetch-items">(2)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Hoodies
-                                    <span class="total-fetch-items">(1)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Suits
-                                    <span class="total-fetch-items">(1)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v4-filter-as-category.html">Black Bean T-Shirt
-                                    <span class="total-fetch-items">(1)</span>
-                                </a>
-                            </li>
+                            
+                            {% for category in categor %}
+                               <li>
+                                    <a href="shop-v3-sub-sub-category.html">{{category.category_name}}
+                                        <span class="total-fetch-items">({{ category.product_count|default:0 }})</span>
+                                    </a>
+                                </li> 
+                            {% endfor %}
+                                
+                            
                         </ul>
-                        <!-- Level-3 /- -->
-                        <!-- Level-2 -->
-                        <h3 class="fetch-mark-category">
-                            <a href="shop-v2-sub-category.html">Outwear
-                                <span class="total-fetch-items">(3)</span>
-                            </a>
-                        </h3>
-                        <!-- Level-2 /- -->
-                        <!-- Level-3 -->
-                        <ul>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Jackets
-                                    <span class="total-fetch-items">(3)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Trench
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Parkas
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Sweaters
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                        </ul>
-                        <!-- Level-3 /- -->
-                        <!-- Level-2 -->
-                        <h3 class="fetch-mark-category">
-                            <a href="shop-v2-sub-category.html">Accessories
-                                <span class="total-fetch-items">(1)</span>
-                            </a>
-                        </h3>
-                        <!-- Level-2 /- -->
-                        <!-- Level-3 -->
-                        <ul>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Watches
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v2-sub-category.html">Ties
-                                    <span class="total-fetch-items">(1)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Scarves
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Belts
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                        </ul>
-                        <!-- Level-3 /- -->
-                        <!-- Level-2 -->
-                        <h3 class="fetch-mark-category">
-                            <a href="shop-v2-sub-category.html">Bottoms
-                                <span class="total-fetch-items">(2)</span>
-                            </a>
-                        </h3>
-                        <!-- Level-2 /- -->
-                        <!-- Level-3 -->
-                        <ul>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Casual Pants
-                                    <span class="total-fetch-items">(2)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Shoes
-                                    <span class="total-fetch-items">(1)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Jeans
-                                    <span class="total-fetch-items">(1)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Shorts
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                        </ul>
-                        <!-- Level-3 /- -->
-                        <!-- Level-2 -->
-                        <h3 class="fetch-mark-category">
-                            <a href="shop-v2-sub-category.html">Underwear
-                                <span class="total-fetch-items">(0)</span>
-                            </a>
-                        </h3>
-                        <!-- Level-2 /- -->
-                        <!-- Level-3 -->
-                        <ul>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Boxers
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Briefs
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Robes
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Socks
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                        </ul>
-                        <!-- Level-3 /- -->
-                        <!-- Level-2 -->
-                        <h3 class="fetch-mark-category">
-                            <a href="shop-v2-sub-category.html">Sunglasses
-                                <span class="total-fetch-items">(2)</span>
-                            </a>
-                        </h3>
-                        <!-- Level-2 /- -->
-                        <!-- Level-3 -->
-                        <ul>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Pilot
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Wayfarer
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Square
-                                    <span class="total-fetch-items">(0)</span>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="shop-v3-sub-sub-category.html">Round
-                                    <span class="total-fetch-items">(2)</span>
-                                </a>
-                            </li>
-                        </ul>
-                        <!-- Level-3 /- -->
+                        
                     </div>
                     <!-- Fetch-Categories-from-Root-Category  /- -->
                 </div>
