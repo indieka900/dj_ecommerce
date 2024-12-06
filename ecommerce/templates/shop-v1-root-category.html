@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% block page %}
-Category
+Shop
 {% endblock %}
 {% block page1 %}
-Category
+Shop
 {% endblock %}
 {% block content %}
     <div class="page-shop u-s-p-t-80">
         <div class="container">
             <!-- Shop-Intro -->
             <div class="shop-intro">
-                <h3>{{cgry_title}}</h3>
+                <h3>{{cgry_title.parent_name}}</h3>
             </div>
             <!-- Shop-Intro /- -->
             <div class="row">
@@ -24,7 +24,7 @@ Category
                             
                             {% for category in categor %}
                                <li>
-                                    <a href="shop-v3-sub-sub-category.html">{{category.category_name}}
+                                    <a href="/products/{{cgry_title.slug}}/{{category.category_name}}/">{{category.category_name}}
                                         <span class="total-fetch-items">({{ category.product_count|default:0 }})</span>
                                     </a>
                                 </li> 

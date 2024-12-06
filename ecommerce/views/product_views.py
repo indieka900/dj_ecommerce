@@ -14,7 +14,6 @@ def home(request):
         'path': 'home',
         **CommonService.get_common_context(request)
     }
-    print(context)
     return render(request, 'home.html', context)
 
 def product_list(request):
@@ -32,7 +31,6 @@ def product_list(request):
         'paginator': paginator,
         **CommonService.get_common_context(request)
     }
-    print(context)
     
     return render(request, 'ecommerce/product_list.html', context)
 
@@ -78,9 +76,6 @@ def products_by_parent_c(request, slug):
         page_number=page_number, 
         per_page=int(per_page)
     )
-    print("Categories:")
-    for category in categories:
-        print(f"{category.category_name}: {category.product_count} products")
     
     # Check if page is out of range
     if products is None:
@@ -89,7 +84,30 @@ def products_by_parent_c(request, slug):
         'products' : products,
         'paginator' : paginator,
         'categor' : categories,
-        'cgry_title' : parent_category.parent_name,
+        'cgry_title' : parent_category,
         **CommonService.get_common_context(request)
     }
     return render(request, 'shop-v1-root-category.html', context)
+
+def products_by_category(request, slug, category_name):
+    page_number = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 2)
+    
+    # Retrieve products with pagination
+    products, paginator, parent_category = ProductService.get_products_by_category(
+        category_name,
+        slug, 
+        page_number=page_number, 
+        per_page=int(per_page)
+    )
+    
+    # Check if page is out of range
+    if products is None:
+        return render(request, 'error.html', {'message': 'Category not found'})
+    context = {
+        'products' : products,
+        'paginator' : paginator,
+        'cgry' : parent_category,
+        **CommonService.get_common_context(request)
+    }
+    return render(request, 'shop-v3-sub-sub-category.html', context)

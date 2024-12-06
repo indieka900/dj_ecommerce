@@ -67,7 +67,7 @@ class ProductService:
         return page_obj, paginator
 
     @classmethod
-    def get_products_by_category(cls, category_slug, page_number=1, per_page=12):
+    def get_products_by_category(cls, category_slug, parent_slug, page_number=1, per_page=12):
         """
         Retrieve products for a specific category.
         
@@ -82,8 +82,8 @@ class ProductService:
         try:
             # Fetch the category with its parent
             category = Category.objects.select_related('parent_category').get(
-                Q(category_name__iexact=category_slug) | 
-                Q(slug=category_slug)
+                Q(category_name__iexact=category_slug) & 
+                Q(parent_category__slug__iexact=parent_slug)
             )
             
             # Filter products by this category
