@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
-from .services import CommonService, ProductService
+from .services import CommonService, ProductService, Category, ParentCategory
+from django.db.models import Prefetch
 from ecommerce.models import Product
 
 def home(request):
@@ -52,3 +53,18 @@ def product_detail(request, pk):
     except Product.DoesNotExist:
         # Handle product not found scenario
         return render(request, '404.html'), 404
+    
+def directory(request):
+    parent_categories = ParentCategory.objects.prefetch_related(
+        Prefetch(
+            'category_set', 
+            queryset=Category.objects.all(), 
+            to_attr='subcategories'
+        )
+    )
+    print(parent_categories)
+    context = {
+        'parent_categories' : parent_categories,
+        **CommonService.get_common_context(request)
+    }
+    return render(request, 'store-directory.html', context)
