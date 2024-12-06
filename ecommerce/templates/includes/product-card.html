@@ -30,6 +30,20 @@
             <h6 class="item-title">
                 <a href="/product/{{item.id}}/">{{ item.title }}</a>
             </h6>
+            
+            {% if path != 'home' %}
+                
+            <div class="item-description">
+                <p>This hoodie is full cotton. It includes a muff sewn onto the lower front, and
+                    (usually) a drawstring to adjust the hood opening. Throughout the U.S., it
+                    is common for middle-school, high-school, and college students to wear this
+                    sweatshirts—with or without hoods—that display their respective school names
+                    or mascots across the chest, either as part of a uniform or personal
+                    preference.
+                </p>
+            </div>
+            {% endif %}
+                
             <div class="item-stars">
                 <div class='star' title="0 out of 5 - based on 0 Reviews">
                     <span style='width: 20px;'></span>

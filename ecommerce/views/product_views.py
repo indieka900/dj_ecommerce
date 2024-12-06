@@ -68,3 +68,13 @@ def directory(request):
         **CommonService.get_common_context(request)
     }
     return render(request, 'store-directory.html', context)
+
+def products_by_parent_c(request, slug):
+    products, paginator, parent_catogory = ProductService.get_products_by_parent_category(slug)
+    context = {
+        'products' : products,
+        'paginator' : paginator,
+        'cgry_title' : parent_catogory.parent_name,
+        **CommonService.get_common_context(request)
+    }
+    return render(request, 'shop-v1-root-category.html', context)

@@ -12,7 +12,7 @@ Directory
             {% for parent in parent_categories %}
             <div class="directory-wrapper">
                 <h2>
-                    <a href="shop-v1-root-category.html">{{parent.parent_name}}</a>
+                    <a href="/products/{{parent.slug}}/">{{parent.parent_name}}</a>
                 </h2>
                 <div class="row">
                     {% for category in parent.category_set.all %}
