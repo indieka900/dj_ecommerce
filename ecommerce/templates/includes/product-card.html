@@ -17,12 +17,12 @@
         <div class="what-product-is">
             <ul class="bread-crumb">
                 <li class="has-separator">
-                    <a href="shop-v1-root-category.html">
+                    <a href="{% url 'product_by_pcategory' item.category.parent_category.slug %}">
                         {{item.category.parent_category.parent_name }}
                     </a>
                 </li>
                 <li class="has-separator">
-                    <a href="shop-v2-sub-category.html">
+                    <a href="{% url 'product_by_category' item.category.slug %}">
                         {{ item.category.category_name}}
                     </a>
                 </li>

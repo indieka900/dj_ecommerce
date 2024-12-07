@@ -89,13 +89,12 @@ def products_by_parent_c(request, slug):
     }
     return render(request, 'shop-v1-root-category.html', context)
 
-def products_by_category(request, slug, category_name):
+def products_by_category(request, slug):
     page_number = request.GET.get('page', 1)
     per_page = request.GET.get('per_page', 2)
     
     # Retrieve products with pagination
     products, paginator, parent_category = ProductService.get_products_by_category(
-        category_name,
         slug, 
         page_number=page_number, 
         per_page=int(per_page)

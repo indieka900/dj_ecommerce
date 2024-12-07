@@ -12,14 +12,14 @@ Directory
             {% for parent in parent_categories %}
             <div class="directory-wrapper">
                 <h2>
-                    <a href="/products/{{parent.slug}}/">{{parent.parent_name}}</a>
+                    <a href="{% url 'product_by_pcategory' parent.slug %}">{{parent.parent_name}}</a>
                 </h2>
                 <div class="row">
                     {% for category in parent.category_set.all %}
                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4">
                         <ul class="dir-list-wrap">
                             <li>
-                                <a href="/products/{{category.parent_category.slug}}/{{category.category_name}}/" class="">{{category.category_name}}</a>
+                                <a href="{% url 'product_by_category' category.slug %}" class="">{{category.category_name}}</a>
                             </li>
                         </ul>
                     </div>

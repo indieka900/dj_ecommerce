@@ -16,10 +16,10 @@ Shop
                         <a href="/">Home</a>
                     </li>
                     <li class="has-separator">
-                        <a href="/products/{{cgry.parent_category.slug}}/">{{cgry.parent_category.parent_name}}</a>
+                        <a href="{% url 'product_by_pcategory' cgry.parent_category.slug %}">{{cgry.parent_category.parent_name}}</a>
                     </li>
                     <li class="is-marked">
-                        <a href="/products/{{cgry.parent_category.slug}}/{{cgry.category_name}}/">{{cgry.category_name}}</a>
+                        <a href="{% url 'product_by_category' cgry.slug %}">{{cgry.category_name}}</a>
                     </li>
                 </ul>
             </div>
@@ -31,7 +31,7 @@ Shop
                     <div class="fetch-categories">
                         <h3 class="title-name">Browse Categories</h3>
                         <h3 class="fetch-mark-category yes-single">
-                            <a href="/products/{{cgry.parent_category.slug}}/{{cgry.category_name}}/">{{cgry.category_name}}
+                            <a href="{% url 'product_by_category' cgry.slug %}">{{cgry.category_name}}
                                 <span class="total-fetch-items">({{products|length}})</span>
                             </a>
                         </h3>
