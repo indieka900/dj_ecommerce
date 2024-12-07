@@ -58,6 +58,12 @@ class ParentCategory(models.Model):
 class Category(models.Model):
     category_name = models.CharField(max_length=50)
     parent_category = models.ForeignKey(ParentCategory, on_delete=models.CASCADE)
+    slug = models.SlugField(unique=True,  blank=True)
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(f"{self.category_name} for {self.parent_category.parent_name}")
+        super().save(*args, **kwargs)
     
     def __str__(self):
         return f"{self.category_name} for {self.parent_category.parent_name}"
