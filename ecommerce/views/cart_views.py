@@ -8,7 +8,6 @@ from django.core.exceptions import ValidationError
 
 @login_required(login_url='account')
 def add_to_cart_view(request, product_id):
-    # print(request.POST)
     if request.method == 'POST':
         if 'add-to-wishlist' in request.POST:
             return redirect(f'/add-wishlist/{product_id}/')
