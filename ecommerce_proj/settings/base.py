@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-3fkp0m^xnffb-@^al^algzx__*!&^-a4esqmm548i2^9-!y7k&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['9762-102-140-250-158.ngrok-free.app']
+ALLOWED_HOSTS = ['9762-102-140-250-158.ngrok-free.app', '*']
 
 
 # Application definition
@@ -32,7 +32,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'ecommerce',
-    'rest_framework'
+    'rest_framework',
+    'blogs',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -79,7 +80,7 @@ CORS_ALLOW_HEADERS = [
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
-    'https://9762-102-140-250-158.ngrok-free.app',  # Your specific ngrok URL
+    'https://9762-102-140-250-158.ngrok-free.app',
 ]
 
 ROOT_URLCONF = 'ecommerce_proj.urls'
