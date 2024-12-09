@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import CustomUser
+from ecommerce.views.services import CommonService
 from django.views.generic import CreateView
 from accounts.forms import UserSignUpForm
 from django.contrib.auth import login, authenticate, logout
@@ -20,7 +21,7 @@ class SignupView(CreateView):
             user.save()
             return redirect('/')
             
-        return render(self.request, "account.html")
+        return render(self.request, "account.html", {})
     
     
 def login_user(request):

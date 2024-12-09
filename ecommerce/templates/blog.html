@@ -179,46 +179,16 @@ Blogs
                     <div class="bl-sidebar u-s-m-b-50">
                         <h3 class="bl-sidebar-title-h3 u-s-m-b-20">Categories</h3>
                         <ul class="bl-sidebar-list">
-                            <li>
-                                <a href="blog.html">Corporate</a>
-                            </li>
-                            <li>
-                                <a href="blog.html">Creative</a>
-                            </li>
-                            <li>
-                                <a href="blog.html">Design</a>
-                            </li>
-                            <li>
-                                <a href="blog.html">News</a>
-                            </li>
-                            <li>
-                                <a href="blog.html">Photography</a>
-                            </li>
+                            
+                            {% for ctry in b_categories %}
+                                <li>
+                                    <a href="{% url 'blogs_by_category' ctry.category %}">{{ctry.category}}</a>
+                                </li>
+                            {% endfor %}
+                                
                         </ul>
                     </div>
                     <!-- Blog-Sidebar-Category /- -->
-                    <!-- Blog-Sidebar-Archive -->
-                    <div class="bl-sidebar u-s-m-b-50">
-                        <h3 class="bl-sidebar-title-h3 u-s-m-b-20">Archives</h3>
-                        <ul class="bl-sidebar-list">
-                            <li>
-                                <a href="blog.html">March 2017 (1)</a>
-                            </li>
-                            <li>
-                                <a href="blog.html">December 2017 (3)</a>
-                            </li>
-                            <li>
-                                <a href="blog.html">November 2017 (4)</a>
-                            </li>
-                            <li>
-                                <a href="blog.html">September 2017 (1)</a>
-                            </li>
-                            <li>
-                                <a href="blog.html">August 2014 (1)</a>
-                            </li>
-                        </ul>
-                    </div>
-                    <!-- Blog-Sidebar-Archive /- -->
                     <!-- Blog-Sidebar-Recent-Post -->
                     <div class="bl-sidebar u-s-m-b-50">
                         <h3 class="bl-sidebar-title-h3 u-s-m-b-20">Recent Post</h3>
