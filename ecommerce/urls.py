@@ -8,6 +8,7 @@ urlpatterns = [
     path('store/', product_views.directory, name='store'),
     path('products/<slug>/', product_views.products_by_parent_c, name='product_by_pcategory'),
     path('shop/<slug>/', product_views.products_by_category, name='product_by_category'),
+    path('search_results/', product_views.search_products, name='search_products'),
     path('cart/', cart_views.cart_detail, name='cart_detail'),
     path('cart-item/<int:pk>/', cart_views.update_cartItem, name='cart_item'),
     path('add-to-cart/<int:product_id>/', cart_views.add_to_cart_view, name='add_to_cart'),

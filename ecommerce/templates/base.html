@@ -140,24 +140,17 @@
               </div>
             </div>
             <div class="col-lg-6 u-d-none-lg">
-              <form class="form-searchbox">
+              <form class="form-searchbox" method="get" action="{% url 'search_products' %}">
                 <label class="sr-only" for="search-landscape">Search</label>
-                <input id="search-landscape" type="text" class="text-field" placeholder="Search everything" />
+                <input id="search-landscape" type="text" name="query" class="text-field" placeholder="Search everything" />
                 <div class="select-box-position">
                   <div class="select-box-wrapper select-hide">
                     <label class="sr-only" for="select-category">Choose category for search</label>
-                    <select class="select-box" id="select-category">
-                      <option selected="selected" value="">All</option>
+                    <select class="select-box" id="select-category" name="category">
+                      <option selected="selected" value="all">All</option>
                       {% for category in categories %}
-                      <option value="{{category}}">{{category.category_name}}</option>
+                      <option value="{{category.slug}}">{{category.category_name}} for {{category.parent_category.parent_name}}</option>
                       {% endfor %}
-                      <!-- <option value="">Women's Clothing</option>
-                        <option value="">Toys Hobbies & Robots</option>
-                        <option value="">Mobiles & Tablets</option>
-                        <option value="">Consumer Electronics</option>
-                        <option value="">Books & Audible</option>
-                        <option value="">Beauty & Health</option>
-                        <option value="">Furniture Home & Office</option> -->
                     </select>
                   </div>
                 </div>
@@ -1044,9 +1037,9 @@
       <div class="responsive-search-container">
         <div class="container">
           <p>Start typing and press Enter to search</p>
-          <form class="responsive-search-form">
+          <form class="responsive-search-form" method="get" action="{% url 'search_products' %}">
             <label class="sr-only" for="search-text">Search</label>
-            <input id="search-text" type="text" class="responsive-search-field" placeholder="PLEASE SEARCH" />
+            <input id="search-text" type="text" name="query" class="responsive-search-field" placeholder="PLEASE SEARCH" />
             <i class="fas fa-search"></i>
           </form>
         </div>

@@ -113,7 +113,7 @@ def products_by_category(request, slug):
 
 def search_products(request):
     page_number = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 10)  # Increased default
+    per_page = request.GET.get('per_page', 10)
     query = request.GET.get('query', '').strip()
     category_slug = request.GET.get('category', 'all')
     
