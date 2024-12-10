@@ -1,6 +1,6 @@
 from django.db.models import Avg, Count, Q, FloatField, F, Min, Max
 from django.db.models.functions import Cast
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage, InvalidPage
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_list_or_404
@@ -331,6 +331,47 @@ class ProductService:
         # prds = get_list_or_404(Product, featured=True)
         prds = Product.objects.filter(featured=True)
         return prds if prds else []
+    
+    @classmethod
+    def search_products(cls, query, category=None, per_page=10, page_number=1):
+        """
+        search products with category filtering
+        """
+        # Validate and sanitize inputs
+        if not query:
+            return None, None
+        
+        # Optimize the query with select_related and prefetch_related
+        base_query = Product.objects.select_related(
+            'brand', 
+            'category', 
+            'category__parent_category'
+        )
+        
+        # Construct search conditions
+        search_conditions = (
+            Q(title__icontains=query) |
+            Q(keywords__icontains=query) |
+            Q(brand__brand_title__icontains=query) |
+            Q(category__category_name__icontains=query) |
+            Q(category__parent_category__parent_name__icontains=query)
+        )
+        
+        # Apply category filter if provided
+        if category:
+            products = base_query.filter(category=category).filter(search_conditions)
+        else:
+            products = base_query.filter(search_conditions)
+        
+        # Remove duplicates and ensure unique results
+        products = products.distinct()
+        
+        try:
+            paginator = Paginator(products, per_page)
+            page_obj = paginator.get_page(page_number)
+            return page_obj, paginator
+        except (EmptyPage, InvalidPage):
+            return None, None
     
 class CartService:
     """

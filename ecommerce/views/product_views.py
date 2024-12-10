@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .services import CommonService, ProductService, Category, ParentCategory
 from django.db.models import Prefetch
 from ecommerce.models import Product
@@ -79,7 +79,7 @@ def products_by_parent_c(request, slug):
     
     # Check if page is out of range
     if products is None:
-        return render(request, 'error.html', {'message': 'Category not found'})
+        return render(request, 'shop-v5-product-not-found.html', {'message': 'Category not found'})
     context = {
         'products' : products,
         'paginator' : paginator,
@@ -102,7 +102,7 @@ def products_by_category(request, slug):
     
     # Check if page is out of range
     if products is None:
-        return render(request, 'error.html', {'message': 'Category not found'})
+        return render(request, 'shop-v5-product-not-found.html', {'message': 'Category not found'})
     context = {
         'products' : products,
         'paginator' : paginator,
@@ -110,3 +110,44 @@ def products_by_category(request, slug):
         **CommonService.get_common_context(request)
     }
     return render(request, 'shop-v3-sub-sub-category.html', context)
+
+def search_products(request):
+    page_number = request.GET.get('page', 1)
+    per_page = request.GET.get('per_page', 10)  # Increased default
+    query = request.GET.get('query', '').strip()
+    category_slug = request.GET.get('category', 'all')
+    
+    # Handle empty query
+    if not query:
+        return redirect('store')
+    
+    # Retrieve category if specified
+    category = None
+    if category_slug and category_slug != 'all':
+        try:
+            category = Category.objects.get(slug=category_slug)
+        except Category.DoesNotExist:
+            # messages.error(request, "Invalid category selected")
+            return redirect('store')
+    
+    # Retrieve products with pagination
+    products, paginator = ProductService.search_products(
+        query,
+        category=category,
+        page_number=int(page_number),
+        per_page=int(per_page)
+    )
+    
+    # Handle no results
+    if not products:
+        # messages.info(request, f"No products found for '{query}'")
+        return render(request, 'shop-v5-product-not-found.html')
+    
+    # Prepare context
+    context = {
+        'products': products,
+        'query': query,
+        'paginator': paginator,
+        **CommonService.get_common_context(request)
+    }
+    return render(request, 'shop-v6-search-results.html', context)

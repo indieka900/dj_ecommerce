@@ -13,10 +13,10 @@ Shop
             <div class="result-wrapper u-s-p-y-80">
                 <ul class="bread-crumb">
                     <li class="has-separator">
-                        <a href="home.html">Home</a>
+                        <a href="/">Home</a>
                     </li>
                     <li class="is-marked">
-                        <a href="store-directory.html">All Categories</a>
+                        <a href="{% url 'store' %}">All Categories</a>
                     </li>
                 </ul>
                 <h4>Your search, did not match any products. A partial match of your keywords is listed below.</h4>
@@ -26,9 +26,9 @@ Shop
                     <a href="shop-v1-root-category.html">books & audible</a>
                 </h4>
                 <h1>SORRY</h1>
-                <form>
+                <form method="get" action="{% url 'search_products' %}">
                     <label class="sr-only" for="search-not-found">Enter Keywords</label>
-                    <input type="text" class="text-field" id="search-not-found" placeholder="Search Products...">
+                    <input type="text" name="query" class="text-field" id="search-not-found" placeholder="Search Products...">
                     <button class="button">Search</button>
                 </form>
             </div>
