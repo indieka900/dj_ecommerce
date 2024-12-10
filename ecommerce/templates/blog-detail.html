@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block page %}
 Blog-Detail
 {% endblock %}
@@ -10,79 +11,25 @@ Blog-Detail
     <!-- Blog-Detail-Page -->
     <div class="page-blog-detail u-s-p-t-80">
         <div class="blog-detail-wrapper">
-            <h1 class="blog-post-detail-heading">Your Life is an extraordinary Adventure</h1>
+            <h1 class="blog-post-detail-heading">{{blog.title}}</h1>
             <div class="blog-post-info u-s-m-b-13">
                 <span class="blog-post-preposition">By</span>
-                <a class="blog-post-author-name" href="blog-detail.html">Admin</a>
+                <a class="blog-post-author-name" href="{% url 'blog-detail' blog.slug %}">{{blog.author}}</a>
                 <span class="blog-post-info-separator">/</span>
-                <a class="blog-post-comment" href="blog-detail.html">Comments (4)</a>
+                <a class="blog-post-comment" href="{% url 'blog-detail' blog.slug %}">Comment{{comments.pluralize}} ({{comments|length}})</a>
                 <span class="blog-post-info-separator">/</span>
                 <span class="blog-post-published-date">
-                    <span>14</span>/
-                    <span>06</span>/
-                    <span>2016</span>
+                    <span>{{ blog.date_posted|date:"d" }}</span>/
+                    <span>{{ blog.date_posted|date:"m" }}</span>/
+                    <span>{{ blog.date_posted|date:"Y" }}</span>
                 </span>
             </div>
             <div class="post-content">
-                <img class="img-fluid" src="images/blog/blog-01.jpg" alt="Blog Post 1">
+                <img class="img-fluid" src="{{blog.image.url}}" alt="{{blog.title}}">
                 <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aliquam aliquid, architecto corporis enim
-                    eum exercitationem fugit harum iste laudantium maxime nam non ratione reiciendis repellendus repudiandae
-                    soluta, velit veritatis. Lorem ipsum dolor sit amet, consectetur adipisicing elit. At autem beatae,
-                    consequuntur dolores inventore
-                    <a href="">laboriosam</a> maiores necessitatibus neque odit quisquam ratione rerum sequi unde veniam
-                    veritatis, voluptatem, voluptatibus. Amet, dicta?
+                    {{ blog.content}}
                 </p>
-                <blockquote>
-                    <p>
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit. Alias commodi corporis cum cumque deserunt
-                        expedita explicabo id ipsa nemo officia praesentium quidem, sed, sint soluta sunt tenetur voluptas!
-                        Quaerat, reiciendis!
-                    </p>
-                </blockquote>
-                <p>
-                    Lorem ipsum dolor
-                    <a href="">sit amet</a>, consectetur adipisicing elit. Ab aliquam aliquid, architecto corporis enim eum
-                    exercitationem fugit harum iste laudantium maxime nam non ratione reiciendis repellendus repudiandae
-                    soluta, velit veritatis. Lorem ipsum dolor sit amet, consectetur adipisicing elit. At autem beatae,
-                    consequuntur dolores
-                    <a href="">inventore</a> laboriosam maiores necessitatibus neque odit quisquam ratione rerum sequi unde
-                    veniam veritatis,
-                    <a href="">voluptatem</a>, voluptatibus. Amet, dicta?
-                </p>
-                <p>
-                    Lorem ipsum dolor sit amet,
-                    <a href="#">consectetur</a> adipisicing elit. Ab aliquam aliquid, architecto corporis enim eum
-                    exercitationem fugit harum iste laudantium maxime nam non ratione reiciendis repellendus repudiandae
-                    soluta, velit veritatis. Lorem ipsum dolor sit amet, consectetur adipisicing elit. At autem beatae,
-                    consequuntur dolores inventore laboriosam
-                    <a href="#">maiores</a> necessitatibus neque odit quisquam ratione rerum sequi unde veniam veritatis,
-                    voluptatem, voluptatibus. Amet, dicta?
-                </p>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aliquam aliquid, architecto corporis enim
-                    eum exercitationem fugit harum iste laudantium maxime nam non ratione reiciendis repellendus repudiandae
-                    soluta, velit veritatis. Lorem ipsum dolor sit amet, consectetur adipisicing elit. At autem beatae,
-                    consequuntur dolores inventore laboriosam maiores necessitatibus neque
-                    <a href="#">odit</a>
-                    quisquam ratione rerum sequi unde veniam veritatis, voluptatem, voluptatibus. Amet, dicta?
-                </p>
-                <p>
-                    Lorem
-                    <a href="#">ipsum</a> dolor sit amet, consectetur adipisicing elit. Ab aliquam aliquid, architecto
-                    corporis enim eum exercitationem fugit harum iste laudantium maxime nam non ratione reiciendis
-                    repellendus repudiandae soluta, velit veritatis. Lorem ipsum dolor sit amet, consectetur adipisicing
-                    elit. At autem beatae, consequuntur dolores inventore laboriosam maiores necessitatibus neque odit
-                    quisquam ratione rerum sequi unde veniam veritatis, voluptatem, voluptatibus. Amet, dicta?
-                </p>
-                <p>
-                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ab aliquam aliquid, architecto corporis enim
-                    eum exercitationem fugit harum iste laudantium maxime nam non ratione reiciendis repellendus repudiandae
-                    soluta, velit veritatis. Lorem ipsum dolor sit amet, consectetur adipisicing elit. At autem beatae,
-                    consequuntur dolores inventore laboriosam maiores necessitatibus neque odit
-                    <a href="#">quisquam</a>
-                    ratione rerum sequi unde veniam veritatis, voluptatem, voluptatibus. Amet, dicta?
-                </p>
+                
             </div>
             <!-- Post-Social-Media -->
             <div class="post-share-wrapper u-s-m-b-25">
@@ -125,11 +72,11 @@ Blog-Detail
             <!-- Previous-Next -->
             <div class="previous-next-wrapper u-s-m-b-25">
                 <div class="previous-container">
-                    <a href="blog-detail.html">
+                    <a href="{% url 'blog-detail' blog.slug %}">
                         <i class="fas fa-angle-left u-s-m-r-9"></i>Previous Post</a>
                 </div>
                 <div class="next-container">
-                    <a href="blog-detail.html">Next Post
+                    <a href="{% url 'blog-detail' blog.slug %}">Next Post
                         <i class="fas fa-angle-right u-s-m-l-9"></i>
                     </a>
                 </div>
@@ -137,12 +84,14 @@ Blog-Detail
             <!-- Previous-Next /- -->
             <!-- Post-Comments -->
             <div class="blog-detail-comment u-s-m-b-50">
-                <h3 class="comment-title u-s-m-b-30">6 Comments on “Your Life is an extraordinary Adventure”</h3>
+                <h3 class="comment-title u-s-m-b-30">{{comments|length}} Comment{{comments.pluralize}} on “{{blog.title}}”</h3>
                 <ol class="comment-list">
-                    <li>
+                    
+                    {% for comment in comments %}
+                        <li>
                         <div class="comment-body">
                             <div class="comment-author-image">
-                                <img src="images/blog/avatar.jpg" alt="avatar image">
+                                <img src="{% static 'images/blog/avatar.jpg' %}" alt="avatar image">
                             </div>
                             <div class="comment-content">
                                 <h3>John Doe</h3>
@@ -154,70 +103,7 @@ Blog-Detail
                             </div>
                         </div>
                     </li>
-                    <li class="comment-reply">
-                        <div class="comment-body">
-                            <div class="comment-author-image">
-                                <img src="images/blog/avatar.jpg" alt="avatar image">
-                            </div>
-                            <div class="comment-content">
-                                <h3>Johnny Chen
-                                    <span>Replied to</span>John Doe
-                                </h3>
-                                <h6>August 10, 2017 at 11:08 am</h6>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem dicta doloribus harum
-                                    numquam provident quidem soluta. Commodi, repudiandae, voluptatem. Aliquid culpa dicta
-                                    eius, esse perferendis placeat quam quas repellendus suscipit.</p>
-                                <a href="#">Reply</a>
-                            </div>
-                        </div>
-                    </li>
-                    <li class="comment-reply">
-                        <div class="comment-body">
-                            <div class="comment-author-image">
-                                <img src="images/blog/avatar.jpg" alt="avatar image">
-                            </div>
-                            <div class="comment-content">
-                                <h3>Rim Wu
-                                    <span>Replied to</span>Johnny Chen
-                                </h3>
-                                <h6>August 10, 2017 at 11:08 am</h6>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem dicta doloribus harum
-                                    numquam provident quidem soluta. Commodi, repudiandae, voluptatem. Aliquid culpa dicta
-                                    eius, esse perferendis placeat quam quas repellendus suscipit.</p>
-                                <a href="#">Reply</a>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="comment-body">
-                            <div class="comment-author-image">
-                                <img src="images/blog/avatar.jpg" alt="avatar image">
-                            </div>
-                            <div class="comment-content">
-                                <h3>Tim Doe</h3>
-                                <h6>August 10, 2017 at 11:08 am</h6>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. autem dicta doloribus harum
-                                    numquam provident quidem soluta. commodi, repudiandae, voluptatem. aliquid culpa dicta
-                                    eius, esse perferendis placeat quam quas repellendus suscipit.</p>
-                                <a href="#">Reply</a>
-                            </div>
-                        </div>
-                    </li>
-                    <li>
-                        <div class="comment-body">
-                            <div class="comment-author-image">
-                                <img src="images/blog/avatar.jpg" alt="avatar image">
-                            </div>
-                            <div class="comment-content">
-                                <h3>Kim Doe</h3>
-                                <h6>August 10, 2017 at 11:08 am</h6>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem dicta doloribus harum
-                                    numquam provident quidem soluta. Commodi, repudiandae, voluptatem. Aliquid culpa dicta
-                                    eius, esse perferendis placeat quam quas repellendus suscipit.</p>
-                                <a href="#">Reply</a>
-                            </div>
-                        </div>
-                    </li>
+                    {% endfor %}
                 </ol>
             </div>
             <!-- Post-Comments /- -->
@@ -228,7 +114,7 @@ Blog-Detail
                 <form>
                     <div class="u-s-m-b-30">
                         <label for="your-comment">Comment</label>
-                        <textarea class="text-area" id="your-comment"></textarea>
+                        <textarea class="text-area"  id="your-comment"></textarea>
                     </div>
                     <div class="u-s-m-b-30">
                         <label for="comment-name">Name
