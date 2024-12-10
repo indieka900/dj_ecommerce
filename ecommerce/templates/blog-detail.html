@@ -11,12 +11,12 @@ Blog-Detail
     <!-- Blog-Detail-Page -->
     <div class="page-blog-detail u-s-p-t-80">
         <div class="blog-detail-wrapper">
-            <h1 class="blog-post-detail-heading">{{blog.title}}</h1>
+            <h1 class="blog-post-detail-heading">{{blog.title|title}}</h1>
             <div class="blog-post-info u-s-m-b-13">
                 <span class="blog-post-preposition">By</span>
-                <a class="blog-post-author-name" href="{% url 'blog-detail' blog.slug %}">{{blog.author}}</a>
+                <a class="blog-post-author-name" href="{% url 'blog-detail' blog.slug %}">{{blog.author|capfirst}}</a>
                 <span class="blog-post-info-separator">/</span>
-                <a class="blog-post-comment" href="{% url 'blog-detail' blog.slug %}">Comment{{comments.pluralize}} ({{comments|length}})</a>
+                <a class="blog-post-comment" href="{% url 'blog-detail' blog.slug %}">Comment{{comments|pluralize}} ({{comments|length}})</a>
                 <span class="blog-post-info-separator">/</span>
                 <span class="blog-post-published-date">
                     <span>{{ blog.date_posted|date:"d" }}</span>/
@@ -84,7 +84,7 @@ Blog-Detail
             <!-- Previous-Next /- -->
             <!-- Post-Comments -->
             <div class="blog-detail-comment u-s-m-b-50">
-                <h3 class="comment-title u-s-m-b-30">{{comments|length}} Comment{{comments.pluralize}} on “{{blog.title}}”</h3>
+                <h3 class="comment-title u-s-m-b-30">{{comments|length}} Comment{{comments|pluralize}} on “{{blog.title|title}}”</h3>
                 <ol class="comment-list">
                     
                     {% for comment in comments %}
@@ -94,12 +94,10 @@ Blog-Detail
                                 <img src="{% static 'images/blog/avatar.jpg' %}" alt="avatar image">
                             </div>
                             <div class="comment-content">
-                                <h3>John Doe</h3>
-                                <h6>August 10, 2017 at 11:08 am</h6>
-                                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Autem dicta doloribus harum
-                                    numquam provident quidem soluta. Commodi, repudiandae, voluptatem. Aliquid culpa dicta
-                                    eius, esse perferendis placeat quam quas repellendus suscipit.</p>
-                                <a href="#">Reply</a>
+                                <h3>{{comment.full_name|title}}</h3>
+                                <h6>{{ comment.added_at|date:"F d, Y \a\\t h:i a" }}</h6>
+                                <p>{{comment.text}}</p>
+                                <!-- <a href="#">Reply</a> -->
                             </div>
                         </div>
                     </li>
@@ -111,26 +109,27 @@ Blog-Detail
             <div class="blog-detail-post-comment u-s-m-b-25">
                 <h3>Type Your Comment</h3>
                 <span>Your email address will not be published. Required fields are marked *</span>
-                <form>
+                <form method="post" action="">
+                    {% csrf_token %}
                     <div class="u-s-m-b-30">
                         <label for="your-comment">Comment</label>
-                        <textarea class="text-area"  id="your-comment"></textarea>
+                        <textarea class="text-area" name="text"  id="your-comment"></textarea>
                     </div>
                     <div class="u-s-m-b-30">
                         <label for="comment-name">Name
                             <span class="astk">*</span>
                         </label>
-                        <input type="text" id="comment-name" class="text-field">
+                        <input type="text" id="comment-name" name="full_name" class="text-field">
                     </div>
                     <div class="u-s-m-b-30">
                         <label for="comment-email">Email
                             <span class="astk">*</span>
                         </label>
-                        <input type="text" id="comment-email" class="text-field">
+                        <input type="email" name="email" id="comment-email" class="text-field">
                     </div>
                     <div class="u-s-m-b-30">
                         <label for="comment-website">Website</label>
-                        <input type="text" id="comment-website" class="text-field">
+                        <input type="text" name="website" id="comment-website" class="text-field">
                     </div>
                     <div class="u-s-m-b-30">
                         <button class="button button-outline-secondary w-100">Post Comment</button>

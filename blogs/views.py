@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from blogs.models import Blog, Comment, BlogCategory
 from ecommerce.views.services import CommonService
+from blogs.forms import CommentForm
 
 def blogs(request):
     blogs = Blog.objects.all()
@@ -26,8 +27,16 @@ def blogs_by_category(request, cat):
 
 def blog(request, slug):
     blog = get_object_or_404(Blog, slug=slug)
-    comments = Comment.objects.filter(blog=blog)
     
+    if request.method == 'POST':
+        print(request.POST)
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.blog = blog
+            comment.save() 
+    comments = Comment.objects.filter(blog=blog)
+
     context = {
         'blog' : blog,
         'comments' : comments,
