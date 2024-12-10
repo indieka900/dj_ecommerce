@@ -14,7 +14,7 @@ class Blog(models.Model):
     title = models.CharField(max_length=100)
     auther = models.CharField(max_length=50)
     category = models.ForeignKey(BlogCategory, on_delete=models.CASCADE, related_name='blog_category')
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, blank=True)
     image = models.ImageField(upload_to='blog_images/')
     date_posted = models.DateField(auto_now_add=True)
     content = models.TextField()
