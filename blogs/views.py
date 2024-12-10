@@ -24,4 +24,16 @@ def blogs_by_category(request, cat):
     }
     return render(request, 'blog.html', context)
 
+def blog(request, slug):
+    blog = get_object_or_404(Blog, slug=slug)
+    comments = Comment.objects.filter(blog=blog)
+    
+    context = {
+        'blog' : blog,
+        'comments' : comments,
+        **CommonService.get_common_context(request)
+    }
+    
+    return render(request, 'blog-detail.html', context)
+
 # Create your views here.
