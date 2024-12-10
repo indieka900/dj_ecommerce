@@ -12,7 +12,7 @@ class BlogCategory(models.Model):
 
 class Blog(models.Model):
     title = models.CharField(max_length=100)
-    auther = models.CharField(max_length=50)
+    author = models.CharField(max_length=50)
     category = models.ForeignKey(BlogCategory, on_delete=models.CASCADE, related_name='blog_category')
     slug = models.SlugField(unique=True, blank=True)
     image = models.ImageField(upload_to='blog_images/')
@@ -25,7 +25,7 @@ class Blog(models.Model):
        super().save(*args, **kwargs) 
     
     def __str__(self):
-        return f"{self.title} by {self.auther}"
+        return f"{self.title} by {self.author}"
     
 class Comment(models.Model):
     full_name = models.CharField(max_length=50)
