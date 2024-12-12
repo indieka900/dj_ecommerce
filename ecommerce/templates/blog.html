@@ -75,9 +75,9 @@ Blogs
                 <!-- Blog-Sidebar-Search -->
                 <div class="bl-sidebar-widget u-s-m-b-50">
                     <h3 class="bl-sidebar-title-h3 u-s-m-b-20">Search</h3>
-                    <form class="group-text-blog-search">
+                    <form class="group-text-blog-search" method="get" action="{% url 'blog-search' %}">
                         <label class="sr-only" for="blog-search">Search On Blog</label>
-                        <input type="text" id="blog-search" class="text-field" placeholder="Type to search">
+                        <input type="text" name="q" id="blog-search" class="text-field" placeholder="Type to search">
                         <button type="submit" class="button fas fa-search"></button>
                     </form>
                 </div>

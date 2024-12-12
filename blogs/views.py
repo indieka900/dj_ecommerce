@@ -31,6 +31,25 @@ def blogs_by_category(request, cat):
     }
     return render(request, 'blog.html', context)
 
+def search_blogs(request):
+    """
+    View to display searched blogs
+    """
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return redirect('/blogs/')
+    
+    blogs = BlogService.get_blogs_with_optimized_query(query=query)
+    categories = BlogService.get_blog_categories()
+    print(categories)
+    
+    context = {
+        'blogs': blogs,
+        'b_categories': categories,
+        **CommonService.get_common_context(request)
+    }
+    return render(request, 'blog.html', context)
+
 
 def blog(request, slug):
     """

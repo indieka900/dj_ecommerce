@@ -1,10 +1,10 @@
 from blogs.models import Blog, BlogCategory
-from django.db import models
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404
 
 class BlogService:
     @classmethod
-    def get_blogs_with_optimized_query(cls, category=None):
+    def get_blogs_with_optimized_query(cls, category=None, query=None):
         """
         Retrieve blogs with optimized database querying
         
@@ -23,6 +23,13 @@ class BlogService:
         
         if category:
             blogs = blogs.filter(category=category)
+            
+        if query:
+            blogs = blogs.filter(
+                Q(title__icontains=query) |
+                Q(category__category__icontains=query) |
+                Q(author__icontains=query)
+            )
         
         return blogs
     
@@ -35,7 +42,7 @@ class BlogService:
             QuerySet: Blog categories with blog count
         """
         return BlogCategory.objects.annotate(
-            blog_count=models.Count('blog_category', distinct=True)
+            blog_count=Count('blog_category', distinct=True)
         )
         
     @classmethod
