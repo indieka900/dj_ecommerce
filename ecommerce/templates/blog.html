@@ -89,7 +89,7 @@ Blogs
 
                         {% for ctry in b_categories %}
                         <li>
-                            <a href="{% url 'blogs_by_category' ctry.category %}">{{ctry.category}}</a>
+                            <a href="{% url 'blogs_by_category' ctry.category %}">{{ctry.category}} ({{ctry.blog_count}})</a>
                         </li>
                         {% endfor %}
 

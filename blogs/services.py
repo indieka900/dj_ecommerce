@@ -18,7 +18,7 @@ class BlogService:
         blogs = Blog.objects.select_related(
             'category' 
         ).prefetch_related(
-            'comments'
+            'blog'
         ).order_by('-date_posted')
         
         if category:
@@ -35,7 +35,7 @@ class BlogService:
             QuerySet: Blog categories with blog count
         """
         return BlogCategory.objects.annotate(
-            blog_count=models.Count('blog', distinct=True)
+            blog_count=models.Count('blog_category', distinct=True)
         )
         
     @classmethod
