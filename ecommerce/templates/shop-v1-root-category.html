@@ -98,44 +98,7 @@ Shop
                     </div>
                     
                     <!-- Pagination Section -->
-                    <div class="pagination-area">
-                        <div class="pagination-number">
-                            <ul>
-                                {% if products.has_previous %}
-                                <li>
-                                    <a href="?page=1" title="First Page">First</a>
-                                </li>
-                                <li>
-                                    <a href="?page={{ products.previous_page_number }}" title="Previous">
-                                        <i class="fa fa-angle-left"></i>
-                                    </a>
-                                </li>
-                                {% endif %}
-                    
-                                {% for num in products.paginator.page_range %}
-                                {% if products.number == num %}
-                                <li class="active">
-                                    <a href="?page={{ num }}">{{ num }}</a>
-                                </li>
-                                {% elif num > products.number|add:"-3" and num < products.number|add:"3" %} <li>
-                                    <a href="?page={{ num }}">{{ num }}</a>
-                                    </li>
-                                    {% endif %}
-                                    {% endfor %}
-                    
-                                    {% if products.has_next %}
-                                    <li>
-                                        <a href="?page={{ products.next_page_number }}" title="Next">
-                                            <i class="fa fa-angle-right"></i>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="?page={{ products.paginator.num_pages }}" title="Last Page">Last</a>
-                                    </li>
-                                    {% endif %}
-                            </ul>
-                        </div>
-                    </div>
+                    {% include 'includes/pagination.html' %}
                     {% else %}
                     <p>No products found in this category.</p>
                     {% endif %}
