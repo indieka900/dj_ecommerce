@@ -16,7 +16,7 @@ Blog-Detail
                 <span class="blog-post-preposition">By</span>
                 <a class="blog-post-author-name" href="{% url 'blog-detail' blog.slug %}">{{blog.author|capfirst}}</a>
                 <span class="blog-post-info-separator">/</span>
-                <a class="blog-post-comment" href="{% url 'blog-detail' blog.slug %}">Comment{{comments|pluralize}} ({{comments|length}})</a>
+                <a class="blog-post-comment" href="#comments">Comment{{comments|pluralize}} ({{comments|length}})</a>
                 <span class="blog-post-info-separator">/</span>
                 <span class="blog-post-published-date">
                     <span>{{ blog.date_posted|date:"d" }}</span>/
@@ -71,19 +71,25 @@ Blog-Detail
             <!-- Post-Tags /- -->
             <!-- Previous-Next -->
             <div class="previous-next-wrapper u-s-m-b-25">
+                {% if previous_blog %}
                 <div class="previous-container">
-                    <a href="{% url 'blog-detail' blog.slug %}">
-                        <i class="fas fa-angle-left u-s-m-r-9"></i>Previous Post</a>
-                </div>
-                <div class="next-container">
-                    <a href="{% url 'blog-detail' blog.slug %}">Next Post
-                        <i class="fas fa-angle-right u-s-m-l-9"></i>
+                    <a href="{% url 'blog-detail' previous_blog.slug %}">
+                        <i class="fas fa-angle-left u-s-m-r-9"></i>Previous Post
                     </a>
                 </div>
+                {% endif %}
+                
+                {% if next_blog %}
+                <div class="next-container">
+                    <a href="{% url 'blog-detail' next_blog.slug %}">
+                        Next Post <i class="fas fa-angle-right u-s-m-l-9"></i>
+                    </a>
+                </div>
+                {% endif %}
             </div>
             <!-- Previous-Next /- -->
             <!-- Post-Comments -->
-            <div class="blog-detail-comment u-s-m-b-50">
+            <div class="blog-detail-comment u-s-m-b-50" id="comments">
                 <h3 class="comment-title u-s-m-b-30">{{comments|length}} Comment{{comments|pluralize}} on “{{blog.title|title}}”</h3>
                 <ol class="comment-list">
                     
