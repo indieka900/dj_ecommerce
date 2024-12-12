@@ -137,6 +137,13 @@ def search_products(request):
         page_number=int(page_number),
         per_page=int(per_page)
     )
+    parent_categories = ParentCategory.objects.prefetch_related(
+        Prefetch(
+            'category_set', 
+            queryset=Category.objects.all(), 
+            to_attr='subcategories'
+        )
+    )
     
     # Handle no results
     if not products:
@@ -148,6 +155,7 @@ def search_products(request):
         'products': products,
         'query': query,
         'paginator': paginator,
+        'parent_categories' : parent_categories,
         **CommonService.get_common_context(request)
     }
     return render(request, 'shop-v6-search-results.html', context)
