@@ -94,3 +94,12 @@ class Profile(models.Model):
     
     class Meta:
         abstract= True
+        
+class ContactUs(models.Model):
+    full_name = models.CharField(max_length=30)
+    email = models.EmailField()
+    subject = models.CharField(max_length=20)
+    message = models.TextField()
+    
+    def __str__(self):
+        return f"{self.full_name} ---- {self.subject}"

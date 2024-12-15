@@ -1,5 +1,5 @@
 from django import forms
-from accounts.models import CustomUser
+from accounts.models import CustomUser, ContactUs
 
 class UserSignUpForm(forms.ModelForm):
     email = forms.EmailField(max_length=156, required=True)
@@ -36,3 +36,10 @@ class UserSignUpForm(forms.ModelForm):
             user.save()
 
         return user
+    
+    
+class ContactForm(forms.ModelForm):
+    
+    class Meta:
+        model = ContactUs
+        fields = ['full_name', 'email', 'subject', 'message']
