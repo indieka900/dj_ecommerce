@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from .models import CustomUser
 from ecommerce.views.services import CommonService
 from django.views.generic import CreateView
-from accounts.forms import UserSignUpForm
+from accounts.forms import UserSignUpForm, ContactForm
 from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 
@@ -14,11 +14,7 @@ class SignupView(CreateView):
 
     def form_valid(self, form):
         if form.is_valid():
-            print(self.request.POST)
-            user = form.save(commit=False)
-            # user.role = self.request.POST.get('user_type')
-            print(user)
-            user.save()
+            form.save()
             return redirect('/')
             
         return render(self.request, "account.html", {})
@@ -54,4 +50,12 @@ def logout_user(request):
 def error_404_view(request, exception):
    
     return render(request, '404.html')
+
+
+def contact_us(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid:
+            form.save()
+    return render(request, 'contact.html')
 

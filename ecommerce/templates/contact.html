@@ -12,13 +12,14 @@ Contact
                 <div class="col-lg-6 col-md-6 col-sm-12">
                     <div class="touch-wrapper">
                         <h1 class="contact-h1">Get In Touch With Us</h1>
-                        <form>
+                        <form method="post" action="">
+                            {% csrf_token %}
                             <div class="group-inline u-s-m-b-30">
                                 <div class="group-1 u-s-p-r-16">
                                     <label for="contact-name">Your Name
                                         <span class="astk">*</span>
                                     </label>
-                                    <input type="text" name="name" id="contact-name" class="text-field" placeholder="Name">
+                                    <input type="text" name="full_name" id="contact-name" class="text-field" placeholder="Name">
                                 </div>
                                 <div class="group-2">
                                     <label for="contact-email">Your Email
@@ -35,7 +36,7 @@ Contact
                             </div>
                             <div class="u-s-m-b-30">
                                 <label for="contact-message">Message:</label>
-                                <textarea class="text-area" name="subject" id="contact-message"></textarea>
+                                <textarea class="text-area" name="message" id="contact-message"></textarea>
                             </div>
                             <div class="u-s-m-b-30">
                                 <button type="submit" class="button button-outline-secondary">Send Message</button>
