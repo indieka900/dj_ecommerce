@@ -57,5 +57,5 @@ def contact_us(request):
         form = ContactForm(request.POST)
         if form.is_valid:
             form.save()
-    return render(request, 'contact.html')
+    return render(request, 'contact.html', {**CommonService.get_common_context(request)})
 
