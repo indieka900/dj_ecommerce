@@ -10,6 +10,7 @@ class AppContent(models.Model):
     logo = models.ImageField(upload_to='app_logos/')
     banner = models.ImageField(upload_to='banners')
     tel_no = models.CharField(max_length=20)
+    location = models.CharField(max_length=50, default='')
     email = models.EmailField()
     favIcon = models.FileField(upload_to='fav-icons/', blank=True, null=True)
     created_at = models.DateField(auto_now_add=True)
