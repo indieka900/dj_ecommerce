@@ -64,7 +64,12 @@ Product-Detail
           </div>
           <div class="section-3-price-original-discount u-s-p-y-14">
             <div class="price">
-              <h4>KSH{{ product.current_selling_price }}</h4>
+              <!-- <h4>KSH{{ product.current_selling_price }}</h4> -->
+              {% if product.has_variants %}
+              <h4>{{ product.display_price }}</h4>
+              {% else %}
+              <h4>Ksh {{ product.current_selling_price }}</h4>
+              {% endif %}
             </div>
             <div class="original-price">
               <span>Original Price:</span>
@@ -102,20 +107,25 @@ Product-Detail
                   </select>
                 </div>
               </div>
+              {% if product.has_variants %}
               <div class="sizes u-s-m-b-11">
                 <span>Available Size:</span>
                 <div class="size-variant select-box-wrapper">
-                  <select class="select-box product-size" name="size">
+                  <select class="select-box product-size" id="size-select" name="size">
 
-                    {% for variant in variants %}
-
-                    {% if variant.size %}
-                    <option value="{{variant.size}}">{{variant.size}}</option>
-                    {% endif %}
+                    {% for size, size_variants in variant_groups.items %}
+                    <option value="{{ size }}">
+                      {{ size }}
+                      {% with first_variant=size_variants.0 %}
+                      (Ksh {{ first_variant.variant_price }})
+                      {% endwith %}
+                    </option>
                     {% endfor %}
                   </select>
                 </div>
               </div>
+              
+              {% endif %}
             </div>
             <div class="section-6-social-media-quantity-actions u-s-p-y-14">
               <div class="quick-social-media-wrapper u-s-m-b-22">

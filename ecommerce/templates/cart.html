@@ -40,7 +40,11 @@ Cart
                                         </td>
                                         <td>
                                             <div class="cart-price">
+                                                {% if item.product.has_variants %}
+                                                Ksh {{item.variant.variant_price}}
+                                                {% else %}
                                                 Ksh {{item.product.current_selling_price}}
+                                                {% endif %}
                                             </div>
                                         </td>
                                         <td>
@@ -55,9 +59,14 @@ Cart
                                         </td>
                                         <td>
                                             <h6>
-                                                {% if item.size %}{{item.size}} -- {% endif %}
+                                                
+                                                {% if item.product.has_variants %}
+                                                    
+                                                {% if item.variant.size %}{{item.variant.size}} -- {% endif %}
 
-                                                {% if item.color %} {{item.color}}{% endif %}
+                                                {% if item.variant.color %} {{item.variant.color}}{% endif %}
+                                                {% endif %}
+                                                    
                                             </h6>
 
                                         </td>
