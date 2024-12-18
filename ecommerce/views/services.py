@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_list_or_404
 from ..models import (
     Product, Category, AppContent, Slider, Wishlist, Cart,CartItem,
-    ParentCategory, Review, WishlistItem
+    ParentCategory, Review, WishlistItem, ProductVariant
 )
 
 class CommonService:
@@ -280,6 +280,16 @@ class ProductService:
             avg_rating=Avg('rating')
         )['avg_rating'] or 0.0
         
+        # Prepare variant information
+        variants = product.variants.all()
+        
+        # Group variants by size if applicable
+        variant_groups = {}
+        if product.has_variants:
+            for variant in variants:
+                if variant.size:
+                    variant_groups.setdefault(variant.size, []).append(variant)
+        
         # Get similar products
         similar_products = Product.objects.filter(
             category=product.category
@@ -298,6 +308,7 @@ class ProductService:
             'images': product.images.all(),
             'similar_products': similar_products,
             'variants': variants,
+            'variant_groups': variant_groups,
             'unique_colors': unique_colors
         }
 
@@ -381,32 +392,60 @@ class CartService:
     @transaction.atomic
     def add_to_cart(cls, user, product : Product, quantity=1, size=None, color=None):
         
-        if product.quantity < quantity:
-            raise ValidationError("Insufficient product quantity")
-        
+        if quantity < 1:
+            raise ValidationError("Quantity must be at least 1")
+
         # Get or create user's cart
         cart, _ = Cart.objects.get_or_create(user=user)
+
+        # Find variant if product has variants
+        variant = None
+        if product.has_variants:
+            # Find matching variant
+            variant = ProductVariant.objects.filter(
+                product=product,
+                size=size,
+                color=color
+            ).first()
+            
+            if not variant:
+                raise ValidationError("Selected variant not found")
+            
+            # Check variant stock
+            if variant.stock < quantity:
+                raise ValidationError(f"Only {variant.stock} items available in this variant")
+            
+            # Reduce variant stock
+            variant.stock -= quantity
+            variant.save()
+        else:
+            # Check product stock for non-variant products
+            if product.quantity < quantity:
+                raise ValidationError(f"Only {product.quantity} items available")
+            
+            # Reduce product stock
+            product.quantity -= quantity
+            product.save()
+
+        # Try to find existing cart item
         try:
             cart_item = CartItem.objects.get(
-                cart=cart, 
-                product=product, 
-                size=size, 
-                color=color
+                cart=cart,
+                product=product,
+                variant=variant
             )
             cart_item.quantity += quantity
         except CartItem.DoesNotExist:
             cart_item = CartItem(
-                cart=cart, 
-                product=product, 
-                quantity=quantity,
-                size=size,
-                color=color
+                cart=cart,
+                product=product,
+                variant=variant,
+                quantity=quantity
             )
+        
+        # Validate and save
         cart_item.full_clean()
         cart_item.save()
-        
-        product.quantity -= quantity
-        product.save()
         
         return cart_item
     

@@ -87,7 +87,38 @@ class Product(models.Model):
     rating = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    has_variants = models.BooleanField(default=False)
+    min_variant_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        null=True, 
+        blank=True
+    )
+    max_variant_price = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        null=True, 
+        blank=True
+    )
 
+    def save(self, *args, **kwargs):
+        # Update min and max variant prices if variants exist
+        if self.variants.exists():
+            variant_prices = self.variants.values_list('variant_price', flat=True)
+            variant_prices = [p for p in variant_prices if p is not None]
+            print(variant_prices)
+            
+            if variant_prices:
+                self.has_variants = True
+                self.min_variant_price = min(variant_prices)
+                self.max_variant_price = max(variant_prices)
+            else:
+                self.has_variants = False
+                self.min_variant_price = None
+                self.max_variant_price = None
+        
+        super().save(*args, **kwargs)
+        
     def calculate_selling_price(self, custom_discount=None):
         discount = custom_discount if custom_discount is not None else self.discount
         
@@ -102,6 +133,18 @@ class Product(models.Model):
     @property
     def current_selling_price(self):
         return self.calculate_selling_price()
+
+    @property
+    def display_price(self):
+        """
+        Returns a price display that shows variant price range or single price
+        """
+        if self.has_variants and self.min_variant_price and self.max_variant_price:
+            if self.min_variant_price == self.max_variant_price:
+                return f"Ksh {self.min_variant_price}"
+            return f"Ksh {self.min_variant_price} - Ksh {self.max_variant_price}"
+        return f"Ksh {self.current_selling_price}"
+
 
 
     def __str__(self):
@@ -121,6 +164,16 @@ class ProductVariant(models.Model):
     color = models.CharField(max_length=20, blank=True)
     stock = models.PositiveIntegerField(default=0)
     variant_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+
+    def clean(self):
+        if self.product.has_variants and not self.variant_price:
+            raise ValidationError("Variant price is required for products with size variations")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+        
+        self.product.save()
 
     def __str__(self):
         return f"{self.product.title} - {self.size}"
@@ -188,21 +241,23 @@ class Cart(models.Model):
         return f"Cart for {self.user.email}"
 
     def total_price(self):
-        return sum(item.total_item_price() for item in self.cart_items.all())  # assuming cart_items related_name
+        return sum(item.total_item_price for item in self.cart_items.all())
 
 class CartItem(models.Model):
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name="cart_items")
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    variant = models.ForeignKey(
+        ProductVariant, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True
+    )
     quantity = models.PositiveIntegerField(default=1)
-    size = models.CharField(max_length=15, blank=True, null=True)
-    color = models.CharField(max_length=30, blank=True, null=True)
-    added_at = models.DateTimeField(auto_now_add=True, verbose_name=_('Added At'))
-    updated_at = models.DateTimeField(auto_now=True, verbose_name=_('Updated At'))
+    added_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = _('Cart Item')
-        verbose_name_plural = _('Cart Items')
-        unique_together = ['cart', 'product', 'size', 'color']
+        unique_together = ['cart', 'product', 'variant']
         ordering = ['-added_at']
         indexes = [
             models.Index(fields=['cart', 'product']),
@@ -210,28 +265,31 @@ class CartItem(models.Model):
         ]
     
     def __str__(self):
-        return f"{self.quantity} of {self.product.title} in cart for {self.cart.user.email}"
+        variant_info = f" ({self.variant})" if self.variant else ""
+        return f"{self.quantity} of {self.product.title}{variant_info}"
 
-    def total_item_price(self):
-        return self.quantity * self.product.current_selling_price
-    
     @property
-    def total_price(self):
+    def total_item_price(self):
         """
         Calculate total price for this cart item
         """
-        return self.product.price * self.quantity
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)
+        # Use variant price if exists, otherwise use product price
+        price = (self.variant.variant_price if self.variant and self.variant.variant_price 
+                 else self.product.current_selling_price)
+        return self.quantity * price
 
     def clean(self):
         """
         Validate cart item before saving
         """
-        # Check product availability
-        if self.product.quantity < self.quantity:
+        # Validate quantity against product stock
+        available_stock = (
+            self.variant.stock if self.variant 
+            else self.product.quantity
+        )
+        # print(available_stock)
+        
+        if self.quantity > available_stock:
             raise ValidationError(_('Requested quantity exceeds available stock'))
 
 
