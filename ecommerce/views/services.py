@@ -408,16 +408,15 @@ class CartService:
                 color=color
             ).first()
             
-            if not variant:
-                raise ValidationError("Selected variant not found")
-            
-            # Check variant stock
-            if variant.stock < quantity:
-                raise ValidationError(f"Only {variant.stock} items available in this variant")
+            if variant:
+                # Check variant stock
+                if variant.stock < quantity:
+                    raise ValidationError(f"Only {variant.stock} items available in this variant")
+                
+                variant.stock -= quantity
+                variant.save()
             
             # Reduce variant stock
-            variant.stock -= quantity
-            variant.save()
         else:
             # Check product stock for non-variant products
             if product.quantity < quantity:
