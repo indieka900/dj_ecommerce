@@ -35,7 +35,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-class OrderViewSet(viewsets.ModelViewSet):
+'''class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.prefetch_related('order_items__product').annotate(
         total_items=Sum('order_items__quantity')
     )
@@ -43,7 +43,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+        return Order.objects.filter(user=self.request.user)'''
 
 class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
