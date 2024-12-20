@@ -1,8 +1,12 @@
 from django.db import models
 from django.forms import ValidationError
-from accounts.models import CustomUser as User
+from accounts.models import Address, CustomUser as User
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
+from django.core.validators import MinValueValidator
+from decimal import Decimal
+import uuid
 
 
 class AppContent(models.Model):
@@ -200,37 +204,117 @@ class Order(models.Model):
         ("Processing", "Processing"),
         ("Shipped", "Shipped"),
         ("Delivered", "Delivered"),
-        ("Cancelled", "Cancelled")
+        ("Cancelled", "Cancelled"),
+        ("Refunded", "Refunded")
+    )
+
+    PAYMENT_STATUS_CHOICES = (
+        ("Pending", "Pending"),
+        ("Paid", "Paid"),
+        ("Failed", "Failed"),
+        ("Refunded", "Refunded")
     )
     
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Product, through='OrderItem')
+    order_number = models.CharField(max_length=20, unique=True, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name='orders')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    shipping_address = models.TextField()
-    transaction_id = models.CharField(max_length=100, unique=True)
-    paid = models.BooleanField(default=False)
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default="Pending")
+    
+    # Address Information
+    shipping_address = models.ForeignKey(Address, on_delete=models.PROTECT, related_name='shipping_orders', blank=True)
+    billing_address = models.ForeignKey(Address, on_delete=models.PROTECT, related_name='billing_orders', blank=True)
+    
+    # Price Information
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
+    shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    total = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.00'))])
+    
+    # Payment Information
+    payment_method = models.CharField(max_length=50, blank=True)
+    transaction_id = models.CharField(max_length=100, unique=True, null=True, blank=True)
+    
+    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
+    
+    # Additional Information
+    notes = models.TextField(blank=True)
+    tracking_number = models.CharField(max_length=100, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['order_number']),
+            models.Index(fields=['status']),
+            models.Index(fields=['payment_status']),
+        ]
+
+    def save(self, *args, **kwargs):
+        if not self.order_number:
+            self.order_number = self.generate_order_number()
+        super().save(*args, **kwargs)
+
+    def generate_order_number(self):
+        """Generate a unique order number"""
+        return f"ORD-{uuid.uuid4().hex[:8].upper()}"
+
+    @property
+    def is_paid(self):
+        return self.payment_status == "Paid"
+
+    @property
+    def can_cancel(self):
+        return self.status in ["Pending", "Processing"]
 
     def __str__(self):
-        return f"Order {self.pk} by {self.user.email}"
+        return f"Order {self.order_number} - {self.user.email}"
 
 class OrderItem(models.Model):
-    STATUS_CHOICES = (
-        ("Pending", "Pending"),
-        ("Delivered", "Delivered"),
-        ("Cancelled", "Cancelled")
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.PROTECT)
+    product = models.ForeignKey('Product', on_delete=models.PROTECT)
+    variant = models.ForeignKey(
+        ProductVariant, 
+        on_delete=models.PROTECT,
+        null=True, 
+        blank=True
     )
     
-    order = models.ForeignKey(Order, related_name='order_items', on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
-    price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)  # Store the price at purchase time
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="Pending")
+    # Price Information
+    quantity = models.PositiveIntegerField(validators=[MinValueValidator(1)])
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    subtotal = models.DecimalField(max_digits=10, decimal_places=2)
     
+    # Product Information at Time of Purchase
+    product_name = models.CharField(max_length=255)  # Store product name at time of purchase
+    variant_info = models.JSONField(null=True, blank=True)  # Store variant details (size, color, etc.)
+    
+    class Meta:
+        ordering = ['id']
+        indexes = [
+            models.Index(fields=['order', 'product']),
+        ]
+
+    def save(self, *args, **kwargs):
+        # Calculate subtotal
+        self.subtotal = self.quantity * self.unit_price
+        
+        # Store current product information
+        self.product_name = self.product.title
+        if self.variant:
+            self.variant_info = {
+                'size': self.variant.size,
+                'color': self.variant.color,
+                'variant_price': str(self.variant.variant_price)
+            }
+        
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.product.title} - {self.status}"
+        variant_info = f" ({self.variant})" if self.variant else ""
+        return f"{self.quantity}x {self.product_name}{variant_info}"
 
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
