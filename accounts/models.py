@@ -3,22 +3,23 @@ from django.db import models
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django_otp.oath import TOTP
 from django_otp.util import random_hex
-
-class UserAdress(models.Model):
-    _id = models.CharField(primary_key=True, editable=False,max_length=255)
-    address_line = models.CharField( max_length=100)
-    city = models.CharField( max_length=70)
-    post_code = models.IntegerField()
-    state = models.CharField( max_length=70)
-    district = models.CharField( max_length=100)
-    county = models.CharField( max_length=60)
-    default = models.BooleanField(default=False)
-    deliveryInstructions = models.TextField(blank=True, null=True)
-    latitude = models.FloatField(blank=True, null=True)
-    longitude = models.FloatField(blank=True, null=True)
+from django.conf import settings
+class Address(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='addresses')
+    full_name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=20)
+    street_address = models.CharField(max_length=255)
+    apartment = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=100)
+    county = models.CharField(max_length=100)
+    postal_code = models.CharField(max_length=20)
+    is_default = models.BooleanField(default=False)
     
+    class Meta:
+        verbose_name_plural = 'Addresses'
+
     def __str__(self):
-        return f"{self.city} --- {self.county}"
+        return f"{self.full_name}, {self.street_address}, {self.city}"
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
