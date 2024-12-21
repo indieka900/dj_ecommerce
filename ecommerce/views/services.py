@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db.models import Avg, Count, Q, FloatField, F, Min, Max
 from django.db.models.functions import Cast
 from django.core.paginator import Paginator, EmptyPage, InvalidPage
@@ -6,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_list_or_404
 from ..models import (
     Product, Category, AppContent, Slider, Wishlist, Cart,CartItem,
-    ParentCategory, Review, WishlistItem, ProductVariant
+    ParentCategory, Review, WishlistItem, ProductVariant, Order, OrderItem
 )
 
 class CommonService:
@@ -409,6 +410,7 @@ class CartService:
             ).first()
             
             if variant:
+                print(variant)
                 # Check variant stock
                 if variant.stock < quantity:
                     raise ValidationError(f"Only {variant.stock} items available in this variant")
@@ -503,3 +505,50 @@ class WishListService:
                 wishlist = w_list, product=product
             )
         return wishlist_item
+    
+# order service
+class OrderService:
+    @classmethod
+    @transaction.atomic
+    def create_order_from_cart(cls, cart, shipping_address, billing_address=None, payment_method=None, notes=None):
+        """
+        Create an order from a cart
+        """
+        # Calculate totals
+        subtotal = cart.total_price()
+        shipping_cost = Decimal('0.00')  # Calculate based on your shipping rules
+        tax = subtotal * Decimal('0.16')  # 16% VAT for example
+        total = subtotal + shipping_cost + tax
+
+        # Create order
+        order = Order.objects.create(
+            user=cart.user,
+            shipping_address=shipping_address,
+            billing_address=billing_address or shipping_address,
+            subtotal=subtotal,
+            shipping_cost=shipping_cost,
+            tax=tax,
+            total=total,
+            payment_method=payment_method,
+            notes=notes
+        )
+
+        # Create order items from cart items
+        for cart_item in cart.cart_items.all():
+            price = (cart_item.variant.variant_price 
+                    if cart_item.variant 
+                    else cart_item.product.current_selling_price)
+            
+            OrderItem.objects.create(
+                order=order,
+                product=cart_item.product,
+                variant=cart_item.variant,
+                quantity=cart_item.quantity,
+                unit_price=price,
+                subtotal=price * cart_item.quantity
+            )
+
+        # Clear the cart
+        cart.cart_items.all().delete()
+
+        return order
