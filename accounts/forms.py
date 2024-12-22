@@ -1,5 +1,5 @@
 from django import forms
-from accounts.models import CustomUser, ContactUs
+from accounts.models import CustomUser, ContactUs, Address
 
 class UserSignUpForm(forms.ModelForm):
     email = forms.EmailField(max_length=156, required=True)
@@ -43,3 +43,18 @@ class ContactForm(forms.ModelForm):
     class Meta:
         model = ContactUs
         fields = ['full_name', 'email', 'subject', 'message']
+        
+class AddressForm(forms.ModelForm):
+    
+    class Meta:
+        model = Address
+        fields = ('email', 'first_name', 'last_name', 'phone', 'street_address', 'apartment', 'city', 'county', 'postal_code', 'is_default', 'notes')
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make all fields required
+        for field in self.fields:
+            self.fields[field].required = True
+        # Apartment is optional
+        self.fields['apartment'].required = False
+        self.fields['notes'].required = False

@@ -6,7 +6,9 @@ from django_otp.util import random_hex
 from django.conf import settings
 class Address(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='addresses')
-    full_name = models.CharField(max_length=255)
+    email = models.EmailField()
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
     phone = models.CharField(max_length=20)
     street_address = models.CharField(max_length=255)
     apartment = models.CharField(max_length=255, blank=True)
@@ -14,12 +16,13 @@ class Address(models.Model):
     county = models.CharField(max_length=100)
     postal_code = models.CharField(max_length=20)
     is_default = models.BooleanField(default=False)
+    notes = models.TextField(blank=True, null=True)
     
     class Meta:
         verbose_name_plural = 'Addresses'
 
     def __str__(self):
-        return f"{self.full_name}, {self.street_address}, {self.city}"
+        return f"{self.first_name} {self.last_name}, {self.street_address}, {self.city}"
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
