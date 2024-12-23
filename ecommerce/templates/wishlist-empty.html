@@ -1,4 +1,18 @@
 {% extends 'includes/empty.html' %}
 {% block content %}
-    No Products were added to the wishlist.
+    <div class="page-cart">
+        <div class="vertical-center">
+            <div class="text-center">
+                <h1>Em
+                    <i class="fas fa-child"></i>ty!
+                </h1>
+                <h5>No Products were added to the wishlist.</h5>
+                <div class="redirect-link-wrapper u-s-p-t-25">
+                    <a class="redirect-link" href="{% url 'store' %}">
+                        <span>Return to Shop</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
