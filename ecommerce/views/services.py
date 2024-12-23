@@ -510,7 +510,7 @@ class WishListService:
 class OrderService:
     @classmethod
     @transaction.atomic
-    def create_order_from_cart(cls, cart, shipping_address, billing_address=None, payment_method=None, notes=None):
+    def create_order_from_cart(cls, cart : Cart, shipping_address, billing_address=None, payment_method=None, notes=None):
         """
         Create an order from a cart
         """

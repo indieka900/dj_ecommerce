@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from accounts.forms import AddressForm
@@ -47,7 +48,9 @@ def create_order(request):
             # Create billing address
             billing_address = Address.objects.create(
                 user=request.user,
-                full_name=form.cleaned_data['billing_full_name'],
+                first_name=form.cleaned_data['billing_first_name'],
+                last_name=form.cleaned_data['billing_last_name'],
+                email=form.cleaned_data['billing_email'],
                 phone=form.cleaned_data['billing_phone'],
                 street_address=form.cleaned_data['billing_street_address'],
                 apartment=form.cleaned_data['billing_apartment'],
@@ -57,12 +60,14 @@ def create_order(request):
             )
             
             # Handle shipping address
-            if form.cleaned_data['same_as_billing']:
+            if not form.cleaned_data['different_shipping_loc']:
                 shipping_address = billing_address
             else:
                 shipping_address = Address.objects.create(
                     user=request.user,
-                    full_name=form.cleaned_data['shipping_full_name'],
+                    first_name=form.cleaned_data['shipping_first_name'],
+                    last_name=form.cleaned_data['shipping_last_name'],
+                    email=form.cleaned_data['shipping_email'],
                     phone=form.cleaned_data['shipping_phone'],
                     street_address=form.cleaned_data['shipping_street_address'],
                     apartment=form.cleaned_data['shipping_apartment'],
@@ -70,9 +75,12 @@ def create_order(request):
                     county=form.cleaned_data['shipping_county'],
                     postal_code=form.cleaned_data['shipping_postal_code']
                 )
-
+    else:
+        print(form.errors)
+        messages.error(request, 'Please correct the errors below.')
+        return redirect('checkout')
     
-    payment_method = request.POST.get('payment_method')
+    payment_method = request.POST.get('payment-method')
     if not payment_method:
         messages.error(request, 'Please select a payment method.')
         return redirect('checkout:checkout')
@@ -80,6 +88,7 @@ def create_order(request):
     notes=form.cleaned_data['order_notes']
 
     try:
+        # print(shipping_address, billing_address)
         with transaction.atomic():
             order = OrderService.create_order_from_cart(
                 cart=cart,
@@ -92,13 +101,14 @@ def create_order(request):
                 request,
                 f'Order {order.order_number} created successfully.'
             )
-            return redirect('orders:order_detail', pk=order.id)
+            return HttpResponse('Order created successfully.')
     except Exception as e:
+        print(e)
         messages.error(
             request,
             'There was an error processing your order. Please try again.'
         )
-        return redirect('checkout:checkout')
+        return redirect('checkout')
 
 @login_required
 def cancel_order(request, pk):

@@ -26,7 +26,7 @@ class CheckoutForm(forms.Form):
     shipping_postal_code = forms.CharField(max_length=20, required=False)
     
     # Checkbox for same as billing
-    different_shipping_loc = forms.BooleanField(required=False)
+    different_shipping_loc = forms.CharField(max_length=20, required=False)
     
     # Order notes
     order_notes = forms.CharField(widget=forms.Textarea, required=False)
@@ -39,6 +39,7 @@ class CheckoutForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         different_shipping_loc = cleaned_data.get('different_shipping_loc')
+        print(different_shipping_loc)
         
         if different_shipping_loc:
             # If shipping is different, validate shipping address fields
@@ -48,7 +49,9 @@ class CheckoutForm(forms.Form):
                              'shipping_email', 'shipping_phone', 'shipping_apartment']
             
             for field in shipping_fields:
+                # print(field)
                 if not cleaned_data.get(field):
+                    if field == 'shipping_apartment':
+                        continue
                     self.add_error(field, 'This field is required when shipping address is different.')
-        
         return cleaned_data
