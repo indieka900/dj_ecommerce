@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'accounts',
     'ecommerce',
+    'payments',
     'rest_framework',
     'blogs',
 ]
