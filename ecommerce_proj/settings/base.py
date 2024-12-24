@@ -1,5 +1,6 @@
 from datetime import timedelta
 from pathlib import Path
+import socket
 import os
 from dotenv import load_dotenv
 
@@ -11,6 +12,16 @@ def str_to_bool(value):
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Get fully qualified domain name
+DOMAIN_NAME = os.getenv('DOMAIN_NAME', None)
+if not DOMAIN_NAME:  # Default or dynamic fallback for development
+    try:
+        from socket import gethostname
+        DOMAIN_NAME = gethostname()
+    except:
+        DOMAIN_NAME = 'localhost'
+
+print(f"DOMAIN_NAME: {DOMAIN_NAME}")
 
 SECRET_KEY = 'django-insecure-3fkp0m^xnffb-@^al^algzx__*!&^-a4esqmm548i2^9-!y7k&'
 
@@ -171,3 +182,10 @@ EMAIL_USE_TLS = str_to_bool(os.environ.get('EMAIL_USE_TLS', 'False'))
 EMAIL_USE_SSL = str_to_bool(os.environ.get('EMAIL_USE_SSL', 'False'))
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('ACCOUNTS_EMAIL_PASSWORD')
+
+# Safaricom daraja credentials
+CONSUMER_KEY = os.getenv('CONSUMER_KEY') 
+CONSUMER_SECRET = os.getenv('CONSUMER_SECRET')  
+SHORTCODE = os.getenv('SHORTCODE')  
+PASSKEY = os.getenv('PASSKEY') 
+BASE_URL = os.getenv('BASE_URL')
