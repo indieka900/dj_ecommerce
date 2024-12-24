@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Waiting for Payment</title>
+    <style>
+      .spinner {
+        border: 16px solid #f3f3f3;
+        border-top: 16px solid #3498db;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        margin: 100px auto;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div style="text-align: center">
+      <div class="spinner"></div>
+      <h3>We are processing your payment. Please wait...</h3>
+      <p id="status-message"></p>
+    </div>
+
+    <script>
+      const transactionId = "{{ transaction.id }}";
+
+      let checkStatusInterval = setInterval(function () {
+        console.log("Checking transaction status...");
+        fetch(`/payment/status/${transactionId}/`)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data)
+            if (data.status === "Success") {
+              clearInterval(checkStatusInterval);
+              window.location.href = "/payment-success/";
+            } else if (data.status === "Failed") {
+              clearInterval(checkStatusInterval);
+              window.location.href = "/payment-failed/";
+            } else if (data.status === "Cancelled") {
+              clearInterval(checkStatusInterval);
+              window.location.href = "/payment-cancelled/";
+            }
+          })
+          .catch((error) => {
+            console.error("Error checking transaction status:", error);
+          });
+      }, 10000);
+    </script>
+  </body>
+</html>

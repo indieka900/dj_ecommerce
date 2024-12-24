@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Payments</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+      .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 20px auto;
+      }
+      h1 {
+        text-align: center;
+        color: #444;
+      }
+      .search-container {
+        margin-bottom: 20px;
+        text-align: center;
+      }
+      .search-container input {
+        padding: 10px;
+        width: 60%;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background-color: #fff;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      table th,
+      table td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+      }
+      table th {
+        background-color: #3498db;
+        color: #fff;
+      }
+      .pagination {
+        text-align: center;
+        margin-top: 20px;
+      }
+      .pagination button {
+        padding: 10px 15px;
+        margin: 5px;
+        border: none;
+        background-color: #3498db;
+        color: #fff;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      .pagination button:disabled {
+        background-color: #ddd;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>View Payments</h1>
+      <div class="search-container">
+        <input
+          type="text"
+          id="search"
+          placeholder="Search transactions by name, phone, or ID..."
+        />
+      </div>
+      <table id="payments-table">
+        <thead>
+          <tr>
+            <!-- <th>Transaction ID</th> -->
+            <!-- <th>Name</th> -->
+            <th>Phone Number</th>
+            <!-- <th>Email</th> -->
+            <th>Amount</th>
+            <th>Status</th>
+            <th>Receipt Number</th>
+            <th>Transaction Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="8" style="text-align: center">Loading...</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <button id="prev-page" disabled>Previous</button>
+        <span id="current-page">1</span>
+        <button id="next-page" disabled>Next</button>
+      </div>
+    </div>
+
+    <script>
+      let currentPage = 1;
+
+      function fetchPayments(page = 1, query = "") {
+        $.ajax({
+          url: `/view_payments/?page=${page}&q=${query}`,
+          method: "GET",
+          success: function (data) {
+            const tbody = $("#payments-table tbody");
+            tbody.empty();
+
+            if (data.payments.length === 0) {
+              tbody.append(
+                '<tr><td colspan="8" style="text-align: center;">No results found</td></tr>'
+              );
+            } else {
+              data.payments.forEach((payment) => {
+                tbody.append(`
+                  <tr>
+                  
+                    <td>${payment.phone_number}</td>
+                    <td>${payment.amount}</td>
+                    <td>${payment.status || "N/A"}</td>
+                    <td>${payment.mpesa_receipt_number || "N/A"}</td>
+                    <td>${payment.transaction_date || "N/A"}</td>
+                    
+                  </tr>
+                `);
+              });
+            }
+
+            $("#current-page").text(data.current_page);
+            $("#prev-page").prop("disabled", !data.has_previous);
+            $("#next-page").prop("disabled", !data.has_next);
+
+            currentPage = data.current_page;
+          },
+          error: function () {
+            alert("Failed to fetch transactions. Please try again.");
+          },
+        });
+      }
+
+      $(document).ready(function () {
+        fetchPayments();
+
+        $("#search").on("input", function () {
+          const query = $(this).val();
+          fetchPayments(1, query);
+        });
+
+        $("#prev-page").on("click", function () {
+          if (currentPage > 1) {
+            fetchPayments(currentPage - 1, $("#search").val());
+          }
+        });
+
+        $("#next-page").on("click", function () {
+          fetchPayments(currentPage + 1, $("#search").val());
+        });
+      });
+    </script>
+  </body>
+</html>

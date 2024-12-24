@@ -3,6 +3,8 @@ import base64
 from datetime import datetime
 import requests
 from django.conf import settings
+
+from accounts.models import CustomUser
 from .models import Transaction
 from ecommerce.models import Order
 
@@ -43,7 +45,7 @@ class MpesaService:
             "PartyA": phone,
             "PartyB": self.shortcode,
             "PhoneNumber": phone,
-            "CallBackURL": "https://your-domain.com/callback/",
+            "CallBackURL": "https://95b2-197-237-67-23.ngrok-free.app/payment/callback/",
             "AccountReference": f"Order_{order_id}",
             "TransactionDesc": "Payment for order"
         }
@@ -91,20 +93,22 @@ class PaymentService:
     def create_payment_for_order(order:Order, phone_number):
         """Create a payment transaction for an order"""
         mpesa = MpesaService()
+        user = CustomUser.objects.get(id=4)
         
         # Create transaction record
         transaction = Transaction.objects.create(
+            user = user,
             order=order,
             phone_number=phone_number,
-            amount=order.total,
+            amount=int(order.total),
             status="Pending"
         )
 
         # Initiate payment
         stk_response = mpesa.initiate_stk_push(
             phone=phone_number,
-            amount=order.total,
-            order_id=order.id
+            amount=int(order.total),
+            order_id=order.order_number
         )
 
         # Update transaction with Mpesa response
