@@ -3,10 +3,11 @@ import base64
 from datetime import datetime
 from decimal import Decimal
 import requests
+from dataclasses import dataclass
 from .utils import convert_kes_to_usd
 from django.conf import settings
 import paypalrestsdk
-from typing import Dict, Any
+from typing import Dict, Any, List
 from accounts.models import CustomUser
 from .models import Transaction
 from ecommerce.models import Order
@@ -98,37 +99,88 @@ paypalrestsdk.configure({
     "client_secret": settings.PAYPAL_SECRET
 })
 
+@dataclass
+class PayPalItem:
+    name: str
+    sku: str
+    price: str
+    currency: str
+    quantity: int
+
 class PayPalService:
     @staticmethod
-    def create_payment(order: Order, return_url: str, cancel_url: str) -> Dict[str, Any]:
-        """Create PayPal payment for an order"""
+    def _create_product_items(order: Order) -> tuple[List[Dict[str, Any]], Decimal]:
+        """Create PayPal items from order products and return total"""
         items = []
-        for order_item in order.items.all():  # Fetch related OrderItem objects
-            items.append({
-                "name": order_item.product_name,
-                "sku": str(order_item.product.id),
-                "price": convert_kes_to_usd(int(order_item.unit_price)),  # Ensure price is a string
-                "currency": "USD",
-                "quantity": order_item.quantity
-            })
-        '''if order.shipping_cost > 0:
-            items.append({
-                "name": "Shipping Cost",
-                "sku": "SHIPPING",
-                "price": convert_kes_to_usd(int(order.shipping_cost)),
-                "currency": "USD",
-                "quantity": 1
-            })
+        items_total = Decimal('0.00')
+        
+        for order_item in order.items.all():
+            item_price_usd = convert_kes_to_usd(int(order_item.unit_price))
+            items.append(PayPalItem(
+                name=order_item.product_name,
+                sku=str(order_item.product.id),
+                price=str(item_price_usd),
+                currency="USD",
+                quantity=order_item.quantity
+            ).__dict__)
+            items_total += Decimal(str(item_price_usd)) * order_item.quantity
+            
+        return items, items_total
+
+    @staticmethod
+    def _add_shipping_and_tax(order: Order, items: List[Dict[str, Any]], items_total: Decimal) -> tuple[List[Dict[str, Any]], Decimal]:
+        """Add shipping and tax items if applicable"""
+        if order.shipping_cost > 0:
+            shipping_usd = convert_kes_to_usd(int(order.shipping_cost))
+            items.append(PayPalItem(
+                name="Shipping Cost",
+                sku="SHIPPING",
+                price=str(shipping_usd),
+                currency="USD",
+                quantity=1
+            ).__dict__)
+            items_total += Decimal(str(shipping_usd))
         
         if order.tax > 0:
-            items.append({
-                "name": "Tax",
-                "sku": "TAX",
-                "price": convert_kes_to_usd(int(order.tax)),
-                "currency": "USD",
-                "quantity": 1
-            })'''
-        payment = paypalrestsdk.Payment({
+            tax_usd = convert_kes_to_usd(int(order.tax))
+            items.append(PayPalItem(
+                name="Tax",
+                sku="TAX",
+                price=str(tax_usd),
+                currency="USD",
+                quantity=1
+            ).__dict__)
+            items_total += Decimal(str(tax_usd))
+            
+        return items, items_total
+
+    @staticmethod
+    def _adjust_rounding_differences(items: List[Dict[str, Any]], items_total: Decimal, total_usd: Decimal) -> None:
+        """Adjust for any rounding differences between items total and order total"""
+        if abs(total_usd - items_total) > Decimal('0.01'):
+            difference = total_usd - items_total
+            last_item = items[-1]
+            original_price = Decimal(last_item["price"])
+            last_item["price"] = f"{(original_price + difference):.2f}"
+
+    @staticmethod
+    def _create_shipping_address(address) -> Dict[str, str]:
+        """Create PayPal shipping address dictionary"""
+        return {
+            "recipient_name": f"{address.first_name} {address.last_name}",
+            "line1": address.street_address,
+            "line2": address.apartment,
+            "city": address.city,
+            "state": address.county,
+            "postal_code": address.postal_code,
+            "country_code": "KE"
+        }
+
+    @staticmethod
+    def _create_payment_data(order: Order, items: List[Dict[str, Any]], total_usd: str,
+                           return_url: str, cancel_url: str) -> Dict[str, Any]:
+        """Create the PayPal payment data dictionary"""
+        return {
             "intent": "sale",
             "payer": {
                 "payment_method": "paypal"
@@ -140,26 +192,40 @@ class PayPalService:
             "transactions": [{
                 "item_list": {
                     "items": items,
-                    "shipping_address": {
-                        "recipient_name": f"{order.shipping_address.first_name} {order.shipping_address.last_name}",
-                        "line1": order.shipping_address.street_address,
-                        "line2": order.shipping_address.apartment,
-                        "city": order.shipping_address.city,
-                        "state": order.shipping_address.county,
-                        "postal_code": order.shipping_address.postal_code,
-                        "country_code": "KE"
-                    }
+                    "shipping_address": PayPalService._create_shipping_address(order.shipping_address)
                 },
                 "amount": {
-                    "total": convert_kes_to_usd(int(order.total)),
+                    "total": total_usd,
                     "currency": "USD"
                 },
                 "description": f"Payment for Order #{order.order_number}"
             }]
-        })
+        }
 
+    @staticmethod
+    def create_payment(order: Order, return_url: str, cancel_url: str) -> Dict[str, Any]:
+        """Create PayPal payment for an order"""
+        # Create items from products
+        items, items_total = PayPalService._create_product_items(order)
+        
+        # Add shipping and tax items
+        items, items_total = PayPalService._add_shipping_and_tax(order, items, items_total)
+        
+        # Convert total order amount
+        total_usd = Decimal(str(convert_kes_to_usd(int(order.total))))
+        
+        # Adjust for any rounding differences
+        PayPalService._adjust_rounding_differences(items, items_total, total_usd)
+        
+        # Create payment data
+        payment_data = PayPalService._create_payment_data(
+            order, items, str(total_usd), return_url, cancel_url
+        )
+        
+        # Create and process payment
+        payment = paypalrestsdk.Payment(payment_data)
+        
         if payment.create():
-            print(payment)
             return {
                 "status": "success",
                 "payment_id": payment.id,
@@ -229,7 +295,6 @@ class PaymentService:
                 return_url=return_url,
                 cancel_url=cancel_url
             )
-            print(paypal_response)
             
             if paypal_response["status"] == "success":
                 transaction.transaction_id = paypal_response["payment_id"]

@@ -89,7 +89,6 @@ def create_order(request):
         return redirect('checkout')
     
     payment_method = request.POST.get('payment-method')
-    print(payment_method)
     if not payment_method:
         messages.error(request, 'Please select a payment method.')
         return redirect('checkout:checkout')
