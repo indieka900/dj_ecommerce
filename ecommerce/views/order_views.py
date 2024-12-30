@@ -8,6 +8,10 @@ from ..models import Order, OrderItem, Cart
 from django.db import transaction
 from .services import OrderService, CommonService
 from accounts.models import Address
+from django.urls import reverse
+from payments.views import initiate_payment
+from payments.services import PaymentService
+from payments.utils import format_phone_number
 
 @login_required(login_url='account')
 def checkout(request):
@@ -35,14 +39,18 @@ def checkout(request):
 def create_order(request):
     if request.method != 'POST':
         return redirect('cart:cart_detail')
-
+    
     cart = Cart.objects.filter(user=request.user).first()
     if not cart or not cart.cart_items.exists():
         messages.error(request, 'Your cart is empty.')
         return redirect('cart:cart_detail')
     
     form = CheckoutForm(request.POST)
-        
+    try:
+        phone = format_phone_number(request.POST.get('billing_phone'))
+    except ValueError as e:
+        raise ValueError(f"Invalid phone number: {str(e)}")
+    
     if form.is_valid():
         with transaction.atomic():
             # Create billing address
@@ -81,6 +89,7 @@ def create_order(request):
         return redirect('checkout')
     
     payment_method = request.POST.get('payment-method')
+    print(payment_method)
     if not payment_method:
         messages.error(request, 'Please select a payment method.')
         return redirect('checkout:checkout')
@@ -97,10 +106,21 @@ def create_order(request):
                 payment_method=payment_method,
                 notes=notes
             )
+            host = request.get_host()
+            payment_service = PaymentService()
+            tr = payment_service.create_payment_for_order(
+                order, payment_method, phone_number = phone,
+                return_url = f'http://{host}{reverse("payment_success")}',
+                cancel_url = f'http://{host}{reverse("payment_cancelled")}'
+            )
             messages.success(
                 request,
                 f'Order {order.order_number} created successfully.'
             )
+            if payment_method == 'mpesa':
+                return redirect('waiting_page', transaction_id=tr.id)
+            if payment_method == 'paypal' and tr.payment_url:
+                return redirect(tr.payment_url)
             return HttpResponse('Order created successfully.')
     except Exception as e:
         print(e)

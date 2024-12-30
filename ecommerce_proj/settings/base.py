@@ -12,16 +12,6 @@ def str_to_bool(value):
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Get fully qualified domain name
-DOMAIN_NAME = os.getenv('DOMAIN_NAME', None)
-if not DOMAIN_NAME:  # Default or dynamic fallback for development
-    try:
-        from socket import gethostname
-        DOMAIN_NAME = gethostname()
-    except:
-        DOMAIN_NAME = 'localhost'
-
-print(f"DOMAIN_NAME: {DOMAIN_NAME}")
 
 SECRET_KEY = 'django-insecure-3fkp0m^xnffb-@^al^algzx__*!&^-a4esqmm548i2^9-!y7k&'
 
@@ -189,5 +179,12 @@ CONSUMER_SECRET = os.getenv('CONSUMER_SECRET')
 SHORTCODE = os.getenv('SHORTCODE')  
 PASSKEY = os.getenv('PASSKEY') 
 BASE_URL = os.getenv('BASE_URL')
+
+PAYPAL_ID = os.getenv('PAYPAL_ID')
+PAYPAL_SECRET = os.getenv('PAYPAL_SECRET')
+PAYPAL_BASE_URL = os.getenv('PAYPAL_BASE_URL')
+PAYPAL_MODE = os.getenv('PAYPAL_MODE')
+PAYPAL_RECEIVER_EMAIL = os.getenv('PAYPAL_RECEIVER_EMAIL')
+PAYPAL_TEST = True
 
 # print(f"CONSUMER_KEY: {CONSUMER_KEY}, CONSUMER_SECRET: {CONSUMER_SECRET}, SHORTCODE: {SHORTCODE}, PASSKEY: {PASSKEY}, BASE_URL: {BASE_URL}")  

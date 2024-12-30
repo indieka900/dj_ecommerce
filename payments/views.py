@@ -3,7 +3,8 @@ from django.shortcuts import redirect, render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_http_methods
-from .services import MpesaService, PaymentService, format_phone_number
+from .services import MpesaService, PaymentService
+from .utils import format_phone_number
 from .models import Transaction
 from ecommerce.models import Order
 import json
@@ -21,7 +22,7 @@ def initiate_payment(request, order_id):
         except ValueError as e:
             raise ValueError(f"Invalid phone number: {str(e)}")
         
-        transaction = PaymentService.create_payment_for_order(order, phone)
+        transaction = PaymentService.create_payment_for_order(order,"mpesa", phone_number=phone)
         
         return redirect('waiting_page', transaction_id=transaction.id)
     except Exception as e:
@@ -53,3 +54,19 @@ def check_payment_status(request, transaction_id):
         "status": transaction.status,
         "order_id": transaction.order.id if transaction.order else None
     })
+    
+"""http://127.0.0.1:8000/payment/payment-success/?paymentId=PAYID-M5ZJA5I47G06661UD320535J&token=EC-46K73850Y9194081C&PayerID=FYQJBA2ECFCQJ"""
+
+
+def payment_success(request):
+    paymentId = request.GET.get('paymentId')
+    PayerID = request.GET.get('PayerID')
+    PaymentService().process_paypal_execution(paymentId, PayerID)
+    return render(request, 'payment_success.html')
+
+def payment_failed(request):
+    return render(request, 'payment_failed.html')
+
+
+def payment_cancelled(request):
+    return render(request, 'payment_cancelled.html')

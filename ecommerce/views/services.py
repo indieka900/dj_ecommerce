@@ -549,6 +549,6 @@ class OrderService:
             )
 
         # Clear the cart
-        cart.cart_items.all().delete()
+        # cart.cart_items.all().delete()
 
         return order
