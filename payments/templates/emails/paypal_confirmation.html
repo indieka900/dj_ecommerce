@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .order-details {
+            margin: 20px 0;
+        }
+
+        .receipt-link {
+            margin: 20px 0;
+        }
+
+        .receipt-link a {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #0070ba;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Thank you for your payment!</h2>
+        </div>
+
+        <p>Dear {{ customer_name }},</p>
+
+        <p>We're pleased to confirm that we've received your payment for order #{{ order.order_number }}.</p>
+
+        <div class="order-details">
+            <h3>Order Details:</h3>
+            <p>Order Number: {{ order.order_number }}</p>
+            <p>Payment ID: {{ payment_id }}</p>
+            <p>Total Amount: KES {{ order.total }}</p>
+        </div>
+
+        {% if receipt_url %}
+        <div class="receipt-link">
+            <p>You can view and download your PayPal receipt here:</p>
+            <a href="{{ receipt_url }}" target="_blank">View PayPal Receipt</a>
+        </div>
+        {% endif %}
+
+        <p>We'll notify you once your order has been shipped.</p>
+
+        <div class="footer">
+            <p>If you have any questions, please don't hesitate to contact us.</p>
+            <p>Best regards,<br>{{ company_name }} Team</p>
+        </div>
+    </div>
+</body>
+
+</html>

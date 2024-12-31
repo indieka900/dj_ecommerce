@@ -11,6 +11,8 @@ from typing import Dict, Any, List
 from accounts.models import CustomUser
 from .models import Transaction
 from ecommerce.models import Order
+from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.template.loader import render_to_string
 
 class MpesaService:
     def __init__(self):
@@ -320,8 +322,12 @@ class PaymentService:
             return False
 
         execution_response = self.paypal_service.execute_payment(payment_id, payer_id)
-        
+        print(execution_response)
         if execution_response["status"] == "success":
+            print("**********************HELLO**********")
+            # Send confirmation email with PayPal receipt link
+            PayPalReceiptService.send_payment_confirmation(transaction.order, payment_id)
+            print(f"Email send to {transaction.order.user.email}")
             transaction.status = "Success"
             transaction.transaction_date = datetime.now()
             transaction.receipt_number = execution_response["transaction_id"]
@@ -332,6 +338,7 @@ class PaymentService:
             order.payment_status = "Paid"
             order.save()
             
+            
             return True
         else:
             transaction.status = "Failed"
@@ -339,3 +346,45 @@ class PaymentService:
             transaction.save()
             return False
     
+    
+class PayPalReceiptService:
+    @staticmethod
+    def send_payment_confirmation(order: Order, payment_id: str):
+        """Send payment confirmation email with PayPal receipt link"""
+        try:
+            # Get payment details from PayPal
+            payment = paypalrestsdk.Payment.find(payment_id)
+            
+            # Get the receipt URL from PayPal
+            receipt_url = next(
+                (link.href for link in payment.links if link.rel == "receipt"),
+                None
+            )
+            print(receipt_url)
+            
+            subject = f'Payment Confirmation - Order #{order.order_number}'
+            
+            # Generate email content
+            context = {
+                'order': order,
+                'payment_id': payment_id,
+                'customer_name': f"{order.shipping_address.first_name} {order.shipping_address.last_name}",
+                'receipt_url': receipt_url
+            }
+            
+            html_content = render_to_string('emails/paypal_confirmation.html', context)
+            
+            # Create and send email
+            email = EmailMessage(
+                subject=subject,
+                body=html_content,
+                to=[order.user.email],
+            )
+            email.content_subtype = "html"
+            
+            email.send()
+            
+            return True
+        except Exception as e:
+            print(f"Error sending payment confirmation: {str(e)}")
+            return False
