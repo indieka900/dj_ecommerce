@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            margin-bottom: 20px;
+        }
+
+        .order-info {
+            margin-bottom: 20px;
+        }
+
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .items-table th,
+        .items-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>{{ company_name }}</h1>
+        <p>{{ company_address }}</p>
+    </div>
+
+    <div class="order-info">
+        <h2>Packing Slip</h2>
+        <p>Order #: {{ order.order_number }}</p>
+        <p>Date: {{ date }}</p>
+
+        <h3>Ship To:</h3>
+        <p>
+            {{ order.shipping_address.first_name }} {{ order.shipping_address.last_name }}<br>
+            {{ order.shipping_address.street_address }}<br>
+            {% if order.shipping_address.apartment %}
+            {{ order.shipping_address.apartment }}<br>
+            {% endif %}
+            {{ order.shipping_address.city }}, {{ order.shipping_address.county }}<br>
+            {{ order.shipping_address.postal_code }}
+        </p>
+    </div>
+
+    <table class="items-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>SKU</th>
+                <th>Quantity</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in order.items.all %}
+            <tr>
+                <td>{{ item.product_name }}</td>
+                <td>{{ item.product.sku }}</td>
+                <td>{{ item.quantity }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="footer">
+        <p>Thank you for your order!</p>
+    </div>
+</body>
+
+</html>
