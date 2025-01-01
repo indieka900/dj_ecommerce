@@ -1,17 +1,17 @@
 # payments/services.py
 import base64
+import requests
+import paypalrestsdk
 from datetime import datetime
 from decimal import Decimal
-import requests
 from dataclasses import dataclass
 from .utils import convert_kes_to_usd
 from django.conf import settings
-import paypalrestsdk
 from typing import Dict, Any, List
 from accounts.models import CustomUser
 from .models import Transaction
 from ecommerce.models import Order
-from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 
 class MpesaService:
@@ -324,10 +324,8 @@ class PaymentService:
         execution_response = self.paypal_service.execute_payment(payment_id, payer_id)
         print(execution_response)
         if execution_response["status"] == "success":
-            print("**********************HELLO**********")
             # Send confirmation email with PayPal receipt link
             PayPalReceiptService.send_payment_confirmation(transaction.order, payment_id)
-            print(f"Email send to {transaction.order.user.email}")
             transaction.status = "Success"
             transaction.transaction_date = datetime.now()
             transaction.receipt_number = execution_response["transaction_id"]
@@ -375,12 +373,13 @@ class PayPalReceiptService:
             html_content = render_to_string('emails/paypal_confirmation.html', context)
             
             # Create and send email
-            email = EmailMessage(
-                subject=subject,
-                body=html_content,
-                to=[order.user.email],
-            )
-            email.content_subtype = "html"
+            
+            email = EmailMultiAlternatives(
+                    subject,
+                    body=html_content,
+                    to=[order.user.email]
+                )
+            email.attach_alternative(html_content, "text/html")
             
             email.send()
             

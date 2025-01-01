@@ -180,6 +180,7 @@ SHORTCODE = os.getenv('SHORTCODE')
 PASSKEY = os.getenv('PASSKEY') 
 BASE_URL = os.getenv('BASE_URL')
 
+#Paypoal credentials 
 PAYPAL_ID = os.getenv('PAYPAL_ID')
 PAYPAL_SECRET = os.getenv('PAYPAL_SECRET')
 PAYPAL_BASE_URL = os.getenv('PAYPAL_BASE_URL')
