@@ -32,7 +32,7 @@ class MpesaService:
         data_to_encode = f'{self.shortcode}{self.passkey}{timestamp}'
         return base64.b64encode(data_to_encode.encode()).decode(), timestamp
 
-    def initiate_stk_push(self, phone, amount, order_id):
+    def initiate_stk_push(self, phone, amount, order_id, call_back_url):
         """Initiate STK push and create transaction record"""
         access_token = self.generate_access_token()
         password, timestamp = self.generate_password()
@@ -47,20 +47,22 @@ class MpesaService:
             "Password": password,
             "Timestamp": timestamp,
             "TransactionType": "CustomerPayBillOnline",
-            "Amount": amount,
+            "Amount": "1",
             "PartyA": phone,
             "PartyB": self.shortcode,
             "PhoneNumber": phone,
-            "CallBackURL": "https://95b2-197-237-67-23.ngrok-free.app/payment/callback/",
+            "CallBackURL": call_back_url,
             "AccountReference": f"Order_{order_id}",
             "TransactionDesc": "Payment for order"
         }
+        print(payload)
 
         response = requests.post(
             f'{self.base_url}/mpesa/stkpush/v1/processrequest',
             json=payload,
             headers=headers
         )
+        print(response.json())
         return response.json()
 
     def process_callback(self, callback_data):
@@ -81,6 +83,7 @@ class MpesaService:
             transaction.status = "Success"
             transaction.receipt_number = receipt_number
             transaction.save()
+            PayPalReceiptService.send_payment_confirmation(transaction)
 
             # Update order status
             order = Order.objects.filter(id=transaction.order.id).first()
@@ -276,13 +279,15 @@ class PaymentService:
 
         if payment_method == "mpesa":
             phone_number = kwargs.get('phone_number')
+            call_back_url = kwargs.get('call_back_url')
             if not phone_number:
                 raise ValueError("Phone number is required for M-PESA payments")
             
             stk_response = self.mpesa_service.initiate_stk_push(
                 phone=phone_number,
                 amount=int(order.total),
-                order_id=order.order_number
+                order_id=order.order_number,
+                call_back_url=call_back_url
             )
             transaction.transaction_id = stk_response.get('CheckoutRequestID')
             
@@ -324,12 +329,13 @@ class PaymentService:
         execution_response = self.paypal_service.execute_payment(payment_id, payer_id)
         print(execution_response)
         if execution_response["status"] == "success":
-            # Send confirmation email with PayPal receipt link
-            PayPalReceiptService.send_payment_confirmation(transaction.order, payment_id)
             transaction.status = "Success"
             transaction.transaction_date = datetime.now()
             transaction.receipt_number = execution_response["transaction_id"]
             transaction.save()
+            
+            # Send confirmation email with PayPal receipt link
+            PayPalReceiptService.send_payment_confirmation(transaction)
 
             # Update order status
             order = transaction.order
@@ -347,26 +353,28 @@ class PaymentService:
     
 class PayPalReceiptService:
     @staticmethod
-    def send_payment_confirmation(order: Order, payment_id: str):
+    def send_payment_confirmation(transaction: Transaction):
         """Send payment confirmation email with PayPal receipt link"""
         try:
-            # Get payment details from PayPal
-            payment = paypalrestsdk.Payment.find(payment_id)
+            payment_id = transaction.transaction_id
+            if transaction.payment_method == 'paypal':
+                # Get payment details from PayPal
+                payment = paypalrestsdk.Payment.find(payment_id)
+                
+                # Get the receipt URL from PayPal
+                receipt_url = next(
+                    (link.href for link in payment.links if link.rel == "receipt"),
+                    None
+                )
+                print(receipt_url)
             
-            # Get the receipt URL from PayPal
-            receipt_url = next(
-                (link.href for link in payment.links if link.rel == "receipt"),
-                None
-            )
-            print(receipt_url)
-            
-            subject = f'Payment Confirmation - Order #{order.order_number}'
+            subject = f'Payment Confirmation - Order #{transaction.order.order_number}'
             
             # Generate email content
             context = {
-                'order': order,
+                'order': transaction.order,
                 'payment_id': payment_id,
-                'customer_name': f"{order.shipping_address.first_name} {order.shipping_address.last_name}",
+                'customer_name': f"{transaction.order.shipping_address.first_name.capitalize()} {transaction.order.shipping_address.last_name.capitalize()}",
                 'receipt_url': receipt_url
             }
             
@@ -377,7 +385,7 @@ class PayPalReceiptService:
             email = EmailMultiAlternatives(
                     subject,
                     body=html_content,
-                    to=[order.user.email]
+                    to=[transaction.order.user.email]
                 )
             email.attach_alternative(html_content, "text/html")
             
