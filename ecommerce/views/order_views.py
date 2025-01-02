@@ -91,7 +91,7 @@ def create_order(request):
     payment_method = request.POST.get('payment-method')
     if not payment_method:
         messages.error(request, 'Please select a payment method.')
-        return redirect('checkout:checkout')
+        return redirect('checkout')
 
     notes=form.cleaned_data['order_notes']
 
@@ -106,11 +106,13 @@ def create_order(request):
                 notes=notes
             )
             host = request.get_host()
+            call_back_url = f'https://{host}{reverse("callback")}'
             payment_service = PaymentService()
             tr = payment_service.create_payment_for_order(
                 order, payment_method, phone_number = phone,
                 return_url = f'http://{host}{reverse("payment_success")}',
-                cancel_url = f'http://{host}{reverse("payment_cancelled")}'
+                cancel_url = f'http://{host}{reverse("payment_cancelled")}',
+                call_back_url = call_back_url
             )
             messages.success(
                 request,
