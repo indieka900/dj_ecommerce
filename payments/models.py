@@ -10,7 +10,7 @@ class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     receipt_number = models.CharField(max_length=50, blank=True, null=True) 
     status = models.CharField(max_length=50, blank=True, null=True)
-    transaction_id = models.CharField(max_length=120, null=True) # 'ch_1H7b8z2eZvKYlo2CwZ3J9J1N'
+    transaction_id = models.CharField(max_length=120, null=True)
     description = models.TextField(blank=True, null=True)  
     transaction_date = models.DateTimeField(blank=True, null=True)
     payment_method = models.CharField(max_length=50, default="mpesa")

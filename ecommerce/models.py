@@ -110,7 +110,6 @@ class Product(models.Model):
         if self.variants.exists():
             variant_prices = self.variants.values_list('variant_price', flat=True)
             variant_prices = [p for p in variant_prices if p is not None]
-            print(variant_prices)
             
             if variant_prices:
                 self.has_variants = True
