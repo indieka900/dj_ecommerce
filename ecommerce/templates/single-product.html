@@ -73,7 +73,11 @@ Product-Detail
             </div>
             <div class="original-price">
               <span>Original Price:</span>
-              <span>KSH{{ product.price }}</span>
+              {% if product.has_variants %}
+              <span>Ksh {{ product.display_price }}</span>
+              {% else %}
+              <span>Ksh {{ product.price }}</span>
+              {% endif %}
             </div>
             <div class="discount-price">
               <span>Discount:</span>

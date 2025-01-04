@@ -404,21 +404,20 @@ class CartService:
         if product.has_variants:
             # Find matching variant
             variant = ProductVariant.objects.filter(
-                product=product,
-                size=size,
-                color=color
+                Q(product=product) & (
+                Q(size=size) |
+                Q(color=color))
             ).first()
             
             if variant:
-                print(variant)
-                # Check variant stock
                 if variant.stock < quantity:
                     raise ValidationError(f"Only {variant.stock} items available in this variant")
                 
                 variant.stock -= quantity
                 variant.save()
+                product.quantity -= quantity
+                product.save()
             
-            # Reduce variant stock
         else:
             # Check product stock for non-variant products
             if product.quantity < quantity:
@@ -482,6 +481,17 @@ class CartService:
     @transaction.atomic
     def remove_cart_item(cls, cart_item:CartItem):
         product = cart_item.product
+        if product.has_variants:
+            # Find matching variant
+            variant = ProductVariant.objects.filter(
+                Q(product=product) |
+                Q(size=cart_item.variant.size) |
+                Q(color=cart_item.variant.color)
+            ).first()
+
+            if variant:
+                variant.stock += cart_item.quantity
+                variant.save()
         
         # Return product quantity back to inventory
         product.quantity += cart_item.quantity

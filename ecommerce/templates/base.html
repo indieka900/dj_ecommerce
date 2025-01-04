@@ -921,7 +921,7 @@
                 <h6>COMPANY</h6>
                 <ul>
                   <li>
-                    <a href="home.html">Home</a>
+                    <a href="/">Home</a>
                   </li>
                   <li>
                     <a href="about.html">About</a>
@@ -937,13 +937,13 @@
                 <h6>INFORMATION</h6>
                 <ul>
                   <li>
-                    <a href="store-directory.html">Categories Directory</a>
+                    <a href="{% url 'store' %}">Categories Directory</a>
                   </li>
                   <li>
-                    <a href="wishlist.html">My Wishlist</a>
+                    <a href="{% url 'wishlist' %}">My Wishlist</a>
                   </li>
                   <li>
-                    <a href="cart.html">My Cart</a>
+                    <a href="{% url 'cart_detail' %}">My Cart</a>
                   </li>
                 </ul>
               </div>
@@ -954,18 +954,18 @@
                 <ul>
                   <li>
                     <i class="fas fa-location-arrow u-s-m-r-9"></i>
-                    <span>819 Sugar Camp Road, West Concord, MN 55985</span>
+                    <span>{{app_data.location}}</span>
                   </li>
                   <li>
-                    <a href="tel:+923086561801">
+                    <a href="tel:{{app_data.tel_no}}">
                       <i class="fas fa-phone u-s-m-r-9"></i>
-                      <span>+111-444-989</span>
+                      <span>{{app_data.tel_no}}</span>
                     </a>
                   </li>
                   <li>
-                    <a href="mailto:contact@domain.com">
+                    <a href="mailto:{{app_data.email}}">
                       <i class="fas fa-envelope u-s-m-r-9"></i>
-                      <span> contact@domain.com</span>
+                      <span> {{app_data.email}}</span>
                     </a>
                   </li>
                 </ul>
@@ -1085,7 +1085,7 @@
     </style>
   </noscript>
   <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
-   <script>
+  <script>
     function addToCart(productId) {
       // Prevent default link behavior
       event.preventDefault();

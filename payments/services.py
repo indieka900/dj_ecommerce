@@ -70,11 +70,12 @@ class MpesaService:
         stk_callback = callback_data.get('Body', {}).get('stkCallback', {})
         result_code = stk_callback.get('ResultCode')
         checkout_request_id = stk_callback.get('CheckoutRequestID')
+        result_desc = stk_callback.get('ResultDesc', '')
         
         transaction = Transaction.objects.filter(transaction_id=checkout_request_id).first()
         if not transaction:
             return False
-
+        order = Order.objects.filter(id=transaction.order.id).first()
         if result_code == 0:
             # Payment successful
             callback_metadata = stk_callback.get('CallbackMetadata', {}).get('Item', [])
@@ -86,16 +87,31 @@ class MpesaService:
             PayPalReceiptService.send_payment_confirmation(transaction)
 
             # Update order status
-            order = Order.objects.filter(id=transaction.order.id).first()
-            if order:
-                order.payment_status = "Paid"
-                order.save()
+            order.payment_status = "Paid"
+            order.save()
 
             return True
-        else:
+        elif result_code == 1:
             transaction.status = "Failed"
+            transaction.description = result_desc or "Payment failed due to an error."
             transaction.save()
-            return False
+
+            print(f"Transaction failed: {result_desc or 'No description provided.'}")
+
+        elif result_code == 1032:  
+            transaction.status = "Cancelled"
+            transaction.description = result_desc or "Transaction was cancelled by the user."
+            transaction.save()
+
+            print(f"Transaction cancelled: {result_desc or 'No description provided.'}")
+        else:
+            transaction.status = "Unknown"
+            transaction.description = f"Unhandled result code: {result_code}. {result_desc}"
+            transaction.save()
+            
+        order.payment_status = "Failed"
+        order.save()
+        return False
 
         
 paypalrestsdk.configure({
@@ -263,9 +279,8 @@ class PaymentService:
         self.mpesa_service = MpesaService()
         self.paypal_service = PayPalService()
 
-    def create_payment_for_order(self, order: Order, payment_method: str, **kwargs) -> Transaction:
+    def create_payment_for_order(self, order: Order, user : CustomUser, payment_method: str, **kwargs) -> Transaction:
         """Create a payment transaction for an order"""
-        user = CustomUser.objects.get(id=4)  # You might want to modify this to get the actual user
         phone_number = kwargs.get('phone_number')
         # Create initial transaction record
         transaction = Transaction.objects.create(
@@ -374,7 +389,7 @@ class PayPalReceiptService:
             context = {
                 'order': transaction.order,
                 'payment_id': payment_id,
-                'customer_name': f"{transaction.order.shipping_address.first_name.capitalize()} {transaction.order.shipping_address.last_name.capitalize()}",
+                'customer_name': f"{transaction.order.shipping_address.first_name} {transaction.order.shipping_address.last_name}",
                 'receipt_url': receipt_url
             }
             
