@@ -2,14 +2,12 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from accounts.forms import AddressForm
 from ecommerce.forms import CheckoutForm
 from ..models import Order, OrderItem, Cart
 from django.db import transaction
 from .services import OrderService, CommonService
 from accounts.models import Address
 from django.urls import reverse
-from payments.views import initiate_payment
 from payments.services import PaymentService
 from payments.utils import format_phone_number
 
@@ -56,10 +54,10 @@ def create_order(request):
             # Create billing address
             billing_address = Address.objects.create(
                 user=request.user,
-                first_name=form.cleaned_data['billing_first_name'],
-                last_name=form.cleaned_data['billing_last_name'],
+                first_name=form.cleaned_data['billing_first_name'].capitalize(),
+                last_name=form.cleaned_data['billing_last_name'].capitalize(),
                 email=form.cleaned_data['billing_email'],
-                phone=form.cleaned_data['billing_phone'],
+                phone=format_phone_number(form.cleaned_data['billing_phone']),
                 street_address=form.cleaned_data['billing_street_address'],
                 apartment=form.cleaned_data['billing_apartment'],
                 city=form.cleaned_data['billing_city'],
@@ -73,10 +71,10 @@ def create_order(request):
             else:
                 shipping_address = Address.objects.create(
                     user=request.user,
-                    first_name=form.cleaned_data['shipping_first_name'],
-                    last_name=form.cleaned_data['shipping_last_name'],
+                    first_name=form.cleaned_data['shipping_first_name'].capitalize(),
+                    last_name=form.cleaned_data['shipping_last_name'].capitalize(),
                     email=form.cleaned_data['shipping_email'],
-                    phone=form.cleaned_data['shipping_phone'],
+                    phone=format_phone_number(form.cleaned_data['shipping_phone']),
                     street_address=form.cleaned_data['shipping_street_address'],
                     apartment=form.cleaned_data['shipping_apartment'],
                     city=form.cleaned_data['shipping_city'],
@@ -108,10 +106,13 @@ def create_order(request):
             host = request.get_host()
             call_back_url = f'https://{host}{reverse("callback")}'
             payment_service = PaymentService()
+            return_url = request.build_absolute_uri(reverse("payment_success"))
+            cancel_url = request.build_absolute_uri(reverse("payment_cancelled"))
             tr = payment_service.create_payment_for_order(
-                order, payment_method, phone_number = phone,
-                return_url = f'http://{host}{reverse("payment_success")}',
-                cancel_url = f'http://{host}{reverse("payment_cancelled")}',
+                order, request.user, payment_method, 
+                phone_number = phone,
+                return_url = return_url,
+                cancel_url = cancel_url,
                 call_back_url = call_back_url
             )
             messages.success(
