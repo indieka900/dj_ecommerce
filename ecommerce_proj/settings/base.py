@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'payments',
     'rest_framework',
     'blogs',
+    'appcontent.apps.AppcontentConfig',
 ]
 
 AUTH_USER_MODEL = 'accounts.CustomUser'

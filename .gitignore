@@ -8,5 +8,7 @@ __pycache__
 # Migration files
 */migrations/[!'__init__.py']*
 
+data.json
+
 # Database
 db.sqlite3
