@@ -122,14 +122,22 @@ class Product(models.Model):
         
         super().save(*args, **kwargs)
         
-    def calculate_selling_price(self, custom_discount=None):
+    def calculate_selling_price(self, custom_discount=None, variant_price=None):
+        """
+        Calculate selling price considering variants and discounts
+        
+        Args:
+            custom_discount: Optional custom discount percentage
+            variant_price: Optional specific variant price to calculate from
+        """
         discount = custom_discount if custom_discount is not None else self.discount
+        base_price = variant_price if variant_price is not None else self.price
         
         if discount < 0 or discount > 100:
             raise ValueError("Discount percentage must be between 0 and 100")
         
-        discount_amount = self.price * (discount / 100)
-        selling_price = self.price - discount_amount
+        discount_amount = base_price * (discount / 100)
+        selling_price = base_price - discount_amount
         
         return round(selling_price, 2)
     
@@ -140,12 +148,16 @@ class Product(models.Model):
     @property
     def display_price(self):
         """
-        Returns a price display that shows variant price range or single price
+        Returns a price display that shows variant price range or single price,
+        with discounts applied
         """
         if self.has_variants and self.min_variant_price and self.max_variant_price:
-            if self.min_variant_price == self.max_variant_price:
-                return f"Ksh {self.min_variant_price}"
-            return f"Ksh {self.min_variant_price} - Ksh {self.max_variant_price}"
+            min_selling_price = self.calculate_selling_price(variant_price=self.min_variant_price)
+            max_selling_price = self.calculate_selling_price(variant_price=self.max_variant_price)
+            
+            if min_selling_price == max_selling_price:
+                return f"Ksh {min_selling_price}"
+            return f"Ksh {min_selling_price} - Ksh {max_selling_price}"
         return f"Ksh {self.current_selling_price}"
 
 
@@ -177,6 +189,15 @@ class ProductVariant(models.Model):
         super().save(*args, **kwargs)
         
         self.product.save()
+    
+    @property
+    def selling_price(self):
+        """
+        Calculate the selling price for this specific variant
+        """
+        if self.variant_price:
+            return self.product.calculate_selling_price(variant_price=self.variant_price)
+        return self.product.current_selling_price
 
     def __str__(self):
         return f"{self.product.title} - {self.size}"
@@ -396,7 +417,6 @@ class WishlistItem(models.Model):
         return f"{self.product.title} in {self.wishlist.user.email}'s wishlist"
     
 models_ = [
-    AppContent,
     Slider,
     Brand,
     Category,
