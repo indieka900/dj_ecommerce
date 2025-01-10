@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from ecommerce.views.services import CommonService, ProductService
+from appcontent.models import Faq, About
 
 
 def home(request):
@@ -29,9 +30,10 @@ def faq(request):
     """
     Render FAQ page.
     """
-    print('FAQ')
+    faqs = Faq.objects.all()
     context = {
         'path': 'faq',
+        'faqs': faqs,
         **CommonService.get_common_context(request)
     }
     return render(request, 'faq.html', context)
