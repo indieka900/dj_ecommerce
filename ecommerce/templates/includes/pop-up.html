@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.notification-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.notification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 300px;
+    margin-top: 10px;
+    padding: 15px 20px;
+    border-radius: 4px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    animation: slideIn 0.5s ease-out;
+    transition: opacity 0.3s ease-out;
+}
+
+.notification.fade-out {
+    opacity: 0;
+}
+
+.notification.success {
+    background-color: #4CAF50;
+    color: white;
+    border-left: 4px solid #45a049;
+}
+
+.notification.error {
+    background-color: #f44336;
+    color: white;
+    border-left: 4px solid #da190b;
+}
+
+.notification.info {
+    background-color: #2196F3;
+    color: white;
+    border-left: 4px solid #0b7dda;
+}
+
+.notification.warning {
+    background-color: #ff9800;
+    color: white;
+    border-left: 4px solid #e68900;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 20px;
+    margin-left: 15px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+</style>
+</head>
+<body>
+
+<div id="notification-container" class="notification-container">
+    <!-- Notifications will be injected here -->
+</div>
+
+<script>
+class NotificationManager {
+    constructor() {
+        this.container = document.getElementById('notification-container');
+    }
+
+    show(message, type = 'info', duration = 5000) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        
+        // Create message text
+        const messageText = document.createElement('span');
+        messageText.textContent = message;
+        
+        // Create close button
+        const closeButton = document.createElement('button');
+        closeButton.className = 'close-btn';
+        closeButton.innerHTML = '×';
+        closeButton.onclick = () => this.remove(notification);
+        
+        // Assemble notification
+        notification.appendChild(messageText);
+        notification.appendChild(closeButton);
+        
+        // Add to container
+        this.container.appendChild(notification);
+        
+        // Set auto-remove timer
+        if (duration > 0) {
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    this.remove(notification);
+                }
+            }, duration);
+        }
+    }
+
+    remove(notification) {
+        notification.classList.add('fade-out');
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.parentElement.removeChild(notification);
+            }
+        }, 300);
+    }
+}
+
+// Initialize notification manager
+const notificationManager = new NotificationManager();
+
+// Django template integration
+document.addEventListener('DOMContentLoaded', function() {
+    // Get Django messages from the template
+    const messages = JSON.parse('{{ messages|safe }}');
+    
+    // Show each message
+    messages.forEach(message => {
+        notificationManager.show(message.message, message.tags);
+    });
+});
+</script>
+
+</body>
+</html>
