@@ -42,12 +42,7 @@ Cart
                                             <div class="cart-price">
                                                 Ksh {% if item.product.has_variants %}
                                                 
-                                                    {% if item.variant.variant_price %}
-                                                       {{item.variant.variant_price}}
-                                                        
-                                                    {% else %}
-                                                       {{item.product.current_selling_price}}
-                                                    {% endif %}
+                                                {{item.variant.selling_price}}
                                                         
                                                 {% else %}
                                                {{item.product.current_selling_price}}

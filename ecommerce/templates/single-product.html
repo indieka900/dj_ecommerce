@@ -74,7 +74,7 @@ Product-Detail
             <div class="original-price">
               <span>Original Price:</span>
               {% if product.has_variants %}
-              <span>Ksh {{ product.display_price }}</span>
+              <span>Ksh {{ product.min_variant_price }} - Ksh {{ product.max_variant_price }}</span>
               {% else %}
               <span>Ksh {{ product.price }}</span>
               {% endif %}
@@ -121,7 +121,7 @@ Product-Detail
                     <option value="{{ size }}">
                       {{ size }}
                       {% with first_variant=size_variants.0 %}
-                      (Ksh {{ first_variant.variant_price }})
+                      (Ksh {{ first_variant.selling_price }})
                       {% endwith %}
                     </option>
                     {% endfor %}

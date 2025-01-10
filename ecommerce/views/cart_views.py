@@ -11,32 +11,42 @@ def add_to_cart_view(request, product_id):
     if request.method == 'POST':
         if 'add-to-wishlist' in request.POST:
             return redirect(f'/add-wishlist/{product_id}/')
+            
     try:
-        # Fetch product
         product = Product.objects.get(id=product_id)
         
+        # Get variant details from form
+        size = request.POST.get('size')
+        color = request.POST.get('color')
+        
+        # Validate variant selection if product has variants
+        if product.has_variants and not (size or color):
+            messages.error(request, "Please select product options")
+            return redirect('product_detail', product_id=product_id)
+
         # Prepare cart addition parameters
         params = {
             'user': request.user,
             'product': product,
-            'quantity': int(request.POST.get('quantity', 1))
+            'quantity': int(request.POST.get('quantity', 1)),
+            'size': size,
+            'color': color
         }
 
-        # Add variant information if product has variants
-        if product.has_variants:
-            params['size'] = request.POST.get('size')
-            params['color'] = request.POST.get('color')
-
         # Add to cart
-        CartService.add_to_cart(**params)
+        cart_item = CartService.add_to_cart(**params)
         
-        messages.success(request, f"{product.title} added to cart!")
+        messages.success(
+            request, 
+            f"{product.title} {'(' + cart_item.variant.__str__() + ')' if cart_item.variant else ''} added to cart!"
+        )
         return redirect('cart_detail')
 
     except Product.DoesNotExist:
         messages.error(request, "Product not found")
     except ValidationError as e:
         messages.error(request, str(e))
+        return redirect('product_detail', pk=product_id)
     
     return redirect('cart_detail')
 

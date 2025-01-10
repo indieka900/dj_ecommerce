@@ -378,7 +378,7 @@ class CartItem(models.Model):
         Calculate total price for this cart item
         """
         # Use variant price if exists, otherwise use product price
-        price = (self.variant.variant_price if self.variant and self.variant.variant_price 
+        price = (self.variant.selling_price if self.variant and self.variant.variant_price 
                  else self.product.current_selling_price)
         return self.quantity * price
 

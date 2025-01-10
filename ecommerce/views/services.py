@@ -390,9 +390,36 @@ class CartService:
     Service class to handle cart-related operations
     """
     @classmethod
+    def _get_variant(cls, product, size=None, color=None):
+        """
+        Helper method to find the correct variant based on size and color
+        """
+        if not product.has_variants:
+            return None
+            
+        variant_query = Q(product=product)
+        if size:
+            variant_query &= Q(size=size)
+        if color:
+            variant_query &= Q(color=color)
+            
+        variant = ProductVariant.objects.filter(variant_query).first()
+        if not variant:
+            raise ValidationError("Selected variant not available")
+        return variant
+
+    @classmethod
+    def _get_item_price(cls, product, variant):
+        """
+        Helper method to determine the correct price based on variant
+        """
+        if variant and variant.variant_price:
+            return variant.selling_price
+        return product.current_selling_price
+
+    @classmethod
     @transaction.atomic
-    def add_to_cart(cls, user, product : Product, quantity=1, size=None, color=None):
-        
+    def add_to_cart(cls, user, product: Product, quantity=1, size=None, color=None):
         if quantity < 1:
             raise ValidationError("Quantity must be at least 1")
 
@@ -402,32 +429,30 @@ class CartService:
         # Find variant if product has variants
         variant = None
         if product.has_variants:
-            # Find matching variant
-            variant = ProductVariant.objects.filter(
-                Q(product=product) & (
-                Q(size=size) |
-                Q(color=color))
-            ).first()
-            
-            if variant:
-                if variant.stock < quantity:
-                    raise ValidationError(f"Only {variant.stock} items available in this variant")
+            if not size and not color:
+                raise ValidationError("Please select product variant options")
                 
-                variant.stock -= quantity
-                variant.save()
-                product.quantity -= quantity
-                product.save()
+            variant = cls._get_variant(product, size, color)
             
+            if not variant:
+                raise ValidationError("Selected variant combination is not available")
+                
+            if variant.stock < quantity:
+                raise ValidationError(f"Only {variant.stock} items available in this variant")
+            
+            variant.stock -= quantity
+            variant.save()
         else:
-            # Check product stock for non-variant products
             if product.quantity < quantity:
                 raise ValidationError(f"Only {product.quantity} items available")
             
-            # Reduce product stock
             product.quantity -= quantity
             product.save()
 
-        # Try to find existing cart item
+        # Calculate the correct price
+        item_price = cls._get_item_price(product, variant)
+
+        # Try to find existing cart item with matching variant
         try:
             cart_item = CartItem.objects.get(
                 cart=cart,
@@ -435,12 +460,14 @@ class CartService:
                 variant=variant
             )
             cart_item.quantity += quantity
+            # cart_item.unit_price = item_price  # Update price in case it changed
         except CartItem.DoesNotExist:
             cart_item = CartItem(
                 cart=cart,
                 product=product,
                 variant=variant,
-                quantity=quantity
+                quantity=quantity,
+                # unit_price=item_price
             )
         
         # Validate and save
