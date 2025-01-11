@@ -197,7 +197,6 @@
         </div>
       </div>
       <!-- Responsive-Buttons /- -->
-      {% include 'includes/pop-up.html' %}
       <!-- Mini Cart -->
       <div class="mini-cart-wrapper">
         <div class="mini-cart">
@@ -809,22 +808,7 @@
     <!-- Header /- -->
     <!-- Page Introduction Wrapper -->
     {% if messages %}
-    <script>
-        const messages = [
-            {% for message in messages %}
-                {
-                    message: "{{ message|escapejs }}",
-                    tags: "{{ message.tags }}"
-                },
-            {% endfor %}
-        ];
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            messages.forEach(message => {
-                notificationManager.show(message.message, message.tags);
-            });
-        });
-    </script>
+    {% include 'includes/pop_up.html' %}
     {% endif %}
 
     {% if path == 'home' %}

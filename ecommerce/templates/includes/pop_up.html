@@ -1,0 +1,17 @@
+{% include 'includes/pop-up.html' %}
+<script>
+    const messages = [
+        {% for message in messages %}
+            {
+                message: "{{ message|escapejs }}",
+                tags: "{{ message.tags }}"
+            },
+        {% endfor %}
+    ];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        messages.forEach(message => {
+            notificationManager.show(message.message, message.tags);
+        });
+    });
+</script>
