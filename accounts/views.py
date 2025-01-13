@@ -48,7 +48,7 @@ def logout_user(request):
     return redirect('account')
         
 def error_404_view(request, exception):
-   
+
     return render(request, '404.html')
 
 
