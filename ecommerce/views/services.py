@@ -449,7 +449,6 @@ class CartService:
             product.quantity -= quantity
             product.save()
 
-        # Calculate the correct price
         item_price = cls._get_item_price(product, variant)
 
         # Try to find existing cart item with matching variant
@@ -460,14 +459,12 @@ class CartService:
                 variant=variant
             )
             cart_item.quantity += quantity
-            # cart_item.unit_price = item_price  # Update price in case it changed
         except CartItem.DoesNotExist:
             cart_item = CartItem(
                 cart=cart,
                 product=product,
                 variant=variant,
-                quantity=quantity,
-                # unit_price=item_price
+                quantity=quantity
             )
         
         # Validate and save

@@ -83,7 +83,7 @@ CORS_ALLOW_HEADERS = [
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
-    'https://fa1d-197-237-67-23.ngrok-free.app',
+    'https://fac3-196-250-209-189.ngrok-free.app',
 ]
 
 ROOT_URLCONF = 'ecommerce_proj.urls'

@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from ecommerce.forms import CheckoutForm
-from ..models import Order, OrderItem, Cart
+from ..models import Order, Cart
 from django.db import transaction
 from .services import OrderService, CommonService
 from accounts.models import Address
@@ -105,6 +105,7 @@ def create_order(request):
             )
             host = request.get_host()
             call_back_url = f'https://{host}{reverse("callback")}'
+            print(call_back_url)
             payment_service = PaymentService()
             return_url = request.build_absolute_uri(reverse("payment_success"))
             cancel_url = request.build_absolute_uri(reverse("payment_cancelled"))
