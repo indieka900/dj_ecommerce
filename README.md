@@ -1,6 +1,6 @@
 # Django E-commerce Platform 🛍️
 
-A fully-featured e-commerce platform built with Django, featuring PayPal, M-PESA, and Pay on Delivery payment options. The platform includes product variants, dynamic pricing, and a robust shopping cart system.
+A fully-featured e-commerce platform built with Django, featuring PayPal, M-PESA, Stripe and Pay on Delivery payment options. The platform includes product variants, dynamic pricing, and a robust shopping cart system.
 
 ![Main Dashboard](docs/images/dashboard.png)
 

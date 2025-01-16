@@ -47,6 +47,7 @@ def create_order(request):
     try:
         phone = format_phone_number(request.POST.get('billing_phone'))
     except ValueError as e:
+        messages.error(request, 'Invalid phone number.')
         raise ValueError(f"Invalid phone number: {str(e)}")
     
     if form.is_valid():

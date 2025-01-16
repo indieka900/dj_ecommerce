@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Prefetch
 from ecommerce.views.services import CartService, WishListService, CommonService
 
-   
+
 @login_required(login_url='account')
 def add_to_wishlist(request, product_id):
     try: 
@@ -14,6 +14,7 @@ def add_to_wishlist(request, product_id):
             user=request.user,
             product=product
         )
+        messages.success(request, "Product added to wishlist")
     except:
         pass
     
@@ -26,8 +27,7 @@ def wishlist_detail(request):
     """
     try:
         wishlist = Wishlist.objects.prefetch_related(
-            Prefetch('wishlist_items', 
-                     queryset=WishlistItem.objects.select_related('product'))
+            Prefetch('wishlist_items', queryset=WishlistItem.objects.select_related('product'))
         ).get(user=request.user)
         
         wishlist_items = wishlist.wishlist_items.all()
@@ -41,6 +41,7 @@ def wishlist_detail(request):
         return render(request, template, context)
     
     except Wishlist.DoesNotExist:
+        messages.info(request, "Your wishlist is empty")
         return render(request, 'wishlist-empty.html', {
             **CommonService.get_common_context(request),
         })

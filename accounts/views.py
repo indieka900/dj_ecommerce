@@ -45,6 +45,7 @@ def login_user(request):
         
 def logout_user(request):
     logout(request)
+    messages.info(request, 'You\'ve logged out')
     return redirect('account')
         
 def error_404_view(request, exception):
@@ -57,5 +58,6 @@ def contact_us(request):
         form = ContactForm(request.POST)
         if form.is_valid:
             form.save()
+            messages.success(request, 'Message sent successfully')
     return render(request, 'contact.html', {**CommonService.get_common_context(request)})
 

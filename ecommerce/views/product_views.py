@@ -3,18 +3,6 @@ from .services import CommonService, ProductService, Category, ParentCategory
 from django.db.models import Prefetch
 from ecommerce.models import Product
 
-def home(request):
-    """
-    Render home page with latest products and categories.
-    """
-    context = {
-        'latest_products': ProductService.get_latest_products(),
-        'featured_products' : ProductService.get_featured_products(),
-        'categories': ProductService.get_featured_categories(),
-        'path': 'home',
-        **CommonService.get_common_context(request)
-    }
-    return render(request, 'home.html', context)
 
 def product_list(request):
     """
