@@ -37,6 +37,7 @@ A fully-featured e-commerce platform built with Django, featuring PayPal, M-PESA
 - Pay on Delivery option
 - Order tracking
 - Payment status monitoring
+- two-step verification 
 
 ![Payment Options](docs/images/payment-options.png)
 
