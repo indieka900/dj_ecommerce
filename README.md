@@ -37,7 +37,7 @@ A fully-featured e-commerce platform built with Django, featuring PayPal, M-PESA
 - Pay on Delivery option
 - Order tracking
 - Payment status monitoring
-- two-step verification 
+- two-step verification
 
 ![Payment Options](docs/images/payment-options.png)
 
@@ -99,11 +99,11 @@ python manage.py runserver
 8. Database Setup (using PostgreSql)
 
 ```bash
-DB_DATABASE=ecommerce
+DB_DATABASE="db_name"
 
-DB_ENGINE=django.db.backends.postgresql_psycopg2
+DB_ENGINE="db_engine"
 
-DB_USER='postgres'
+DB_USER='dbuser'
 
 DB_PASSWORD='yourpassword'
 
