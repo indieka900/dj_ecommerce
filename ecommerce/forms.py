@@ -44,9 +44,9 @@ class CheckoutForm(forms.Form):
         if different_shipping_loc:
             # If shipping is different, validate shipping address fields
             shipping_fields = ['shipping_first_name','shipping_last_name', 
-                             'shipping_street_address', 'shipping_city', 
-                             'shipping_county', 'shipping_postal_code',
-                             'shipping_email', 'shipping_phone', 'shipping_apartment']
+                            'shipping_street_address', 'shipping_city', 
+                            'shipping_county', 'shipping_postal_code',
+                            'shipping_email', 'shipping_phone', 'shipping_apartment']
             
             for field in shipping_fields:
                 # print(field)

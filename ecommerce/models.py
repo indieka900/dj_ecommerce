@@ -230,6 +230,7 @@ class Order(models.Model):
 
     PAYMENT_STATUS_CHOICES = (
         ("Pending", "Pending"),
+        ("Cash-On-Delivery", "Cash-On-Delivery"),
         ("Paid", "Paid"),
         ("Failed", "Failed"),
         ("Refunded", "Refunded")

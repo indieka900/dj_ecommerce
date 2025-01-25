@@ -104,6 +104,14 @@ def create_order(request):
                 payment_method=payment_method,
                 notes=notes
             )
+            if payment_method == "cash-on-delivery":
+                order.status = "Cash-On-Delivery"
+                order.save()
+                messages.success(
+                    request,
+                    f'Order {order.order_number} created successfully.'
+                )   
+                return redirect('/')
             host = request.get_host()
             call_back_url = f'https://{host}{reverse("callback")}'
             print(call_back_url)
