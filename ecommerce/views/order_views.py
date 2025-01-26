@@ -142,7 +142,7 @@ def create_order(request):
         )
         return redirect('checkout')
 
-@login_required
+@login_required(login_url='account')
 def cancel_order(request, pk):
     order = get_object_or_404(Order, pk=pk, user=request.user)
     
@@ -168,3 +168,12 @@ def cancel_order(request, pk):
         )
     
     return redirect('orders:order_detail', pk=order.id)
+
+@login_required(login_url='account')
+def orders(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    context = {
+        'orders': orders,
+        **CommonService.get_common_context(request)
+    }
+    return render(request, 'orders.html', context)

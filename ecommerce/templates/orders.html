@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block page %}
+Order
+{% endblock %}
+{% block page1 %}
+Order
+{% endblock %}
+{% block content %}
+<!-- Order-Page -->
+<div class="page-cart u-s-p-t-80">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <!-- <form method="post"> -->
+                    <!-- Products-List-Wrapper -->
+                    <div class="table-wrapper u-s-m-b-60">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Order</th>
+                                    <th>Amount</th>
+                                    <th>Quantity</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                                {% for item in orders %}
+                                <form action="{% url 'cart_item' item.id %}" method="post" class="post-form">
+                                    {% csrf_token %}
+                                    <tr>
+                                        <td>
+                                            <div class="cart-anchor-image">
+                                                <a href="{% url 'product_detail' item.id %}">
+                                                    <!-- <img src="{{item.product.prod_img.url}}" alt="Product"> -->
+                                                    <h6>{{item.order_number}}</h6>
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cart-price">
+                                                Ksh {{item.total}}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="cart-quantity">
+                                                {{item.status}}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <h6>
+                                                {{item.status}}
+                                            </h6>
+
+                                        </td>
+                                        <td>
+                                            <div class="action-wrapper">
+
+                                                <button name="update"
+                                                    class="button button-outline-secondary fas fa-sync update-cart-item"></button>
+                                                <button name="delete"
+                                                    class="button button-outline-secondary fas fa-trash update-cart-item"></button>
+                                                <!-- <a href="{% url 'cart_item' item.id %}"
+                                                class="button button-outline-secondary fas fa-trash"></a> -->
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </form>
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Products-List-Wrapper /- -->
+                <!-- </form> -->
+                
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Cart-Page /- -->
+
+{% endblock %}
+
+<!-- Footer -->
