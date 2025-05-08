@@ -110,7 +110,7 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
         "rest_framework.permissions.IsAdminUser",
-       # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
 
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -188,5 +188,3 @@ PAYPAL_BASE_URL = os.getenv('PAYPAL_BASE_URL')
 PAYPAL_MODE = os.getenv('PAYPAL_MODE')
 PAYPAL_RECEIVER_EMAIL = os.getenv('PAYPAL_RECEIVER_EMAIL')
 PAYPAL_TEST = True
-
-# print(f"CONSUMER_KEY: {CONSUMER_KEY}, CONSUMER_SECRET: {CONSUMER_SECRET}, SHORTCODE: {SHORTCODE}, PASSKEY: {PASSKEY}, BASE_URL: {BASE_URL}")  
