@@ -1,19 +1,15 @@
 from rest_framework import serializers
+from django.db import transaction
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.conf import settings
-from accounts.models import CustomUser, Profile
+from accounts.models import CustomUser, Profile, CustomerProfile
 from accounts.utils import OTPManager
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'role', 'is_active']
-        read_only_fields = ['id', 'is_active']
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
@@ -43,37 +39,54 @@ class LoginSerializer(serializers.Serializer):
         
         data['user'] = user
         return data
-class ProfileUpdateSerializer(serializers.ModelSerializer):
+
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    # Profile fields
+    country = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    city = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    street_address = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    profile_picture = serializers.ImageField(required=False, allow_null=True)
+
     class Meta:
         model = CustomUser
-        fields = ('email', 'first_name', 'last_name', 'phone_number', 'role')
+        fields = [
+            'email', 'first_name', 'last_name', 'phone_number',
+            'country', 'city', 'street_address', 'profile_picture',
+        ]
+        read_only_fields = ['email']
 
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ('country', 'city', 'street_address', 'profile_picture')
-class CompleteProfileUpdateSerializer(serializers.Serializer):
-    user = ProfileUpdateSerializer()
-    profile = ProfileSerializer()
+    def to_representation(self, instance):
+        """Add profile info to the representation."""
+        representation = super().to_representation(instance)
+        try:
+            profile = instance.customerprofile_profile  # based on related_name
+            representation.update({
+                'country': profile.country,
+                'city': profile.city,
+                'street_address': profile.street_address,
+                'profile_picture': self.context['request'].build_absolute_uri(profile.profile_picture.url) if profile.profile_picture else None,
+            })
+        except CustomerProfile.DoesNotExist:
+            pass
+        return representation
 
+    @transaction.atomic
     def update(self, instance, validated_data):
-        # Extract the nested data
-        user_data = validated_data.pop('user', {})
-        profile_data = validated_data.pop('profile', {})
+        profile_fields = ['country', 'city', 'street_address', 'profile_picture']
+        profile_data = {field: validated_data.pop(field) for field in profile_fields if field in validated_data}
 
-        # Update CustomUser instance
-        user_instance = instance  # instance here refers to the CustomUser instance
-        for attr, value in user_data.items():
-            setattr(user_instance, attr, value)
-        user_instance.save()
+        # Update user fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
 
-        # Update Profile instance
-        # profile_instance = instance.profile  # This fetches the related Profile instance
-        # for attr, value in profile_data.items():
-        #     setattr(profile_instance, attr, value)
-        # profile_instance.save()
+        # Update or create profile
+        profile, created = CustomerProfile.objects.get_or_create(user=instance)
+        for attr, value in profile_data.items():
+            setattr(profile, attr, value)
+        profile.save()
 
-        return instance 
+        return instance
 class VerifyOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField()

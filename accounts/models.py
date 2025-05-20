@@ -99,6 +99,10 @@ class Profile(models.Model):
     class Meta:
         abstract= True
         
+class CustomerProfile(Profile):
+    class Meta:
+        verbose_name = 'Customer Profile'
+        
 class ContactUs(models.Model):
     full_name = models.CharField(max_length=30)
     email = models.EmailField()
