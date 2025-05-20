@@ -50,7 +50,7 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
-            'email', 'first_name', 'last_name', 'phone_number',
+            'id', 'email', 'first_name', 'last_name', 'phone_number',
             'country', 'city', 'street_address', 'profile_picture',
         ]
         read_only_fields = ['email']

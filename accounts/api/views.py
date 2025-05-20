@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.response import Response
+from accounts.models import CustomUser
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.viewsets import ViewSet
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -12,6 +13,7 @@ from .serializers import (
 
 class UserManagementViewSet(ViewSet):
     permission_classes = [AllowAny]
+    queryset = CustomUser.objects.all()
 
     @action(detail=False, methods=['post'], url_path='register')
     def register(self, request):
@@ -23,6 +25,13 @@ class UserManagementViewSet(ViewSet):
                 "user": UserProfileUpdateSerializer(user, context={'request': request}).data
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=False, methods=['get'], url_path='all-users', permission_classes=[IsAuthenticated])
+    def all_users(self, request):
+        """Get all users."""
+        users = self.queryset.all()
+        serializer = UserProfileUpdateSerializer(users, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['post'], url_path='login')
     def login_user(self, request):
