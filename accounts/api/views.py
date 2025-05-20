@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from ..signals import send_otp_email
 from rest_framework.decorators import action
 from .serializers import (
-    PasswordResetConfirmSerializer, PasswordResetSerializer, RegistrationSerializer, LoginSerializer,
+    PasswordChangeSerializer, PasswordResetConfirmSerializer, PasswordResetSerializer, RegistrationSerializer, LoginSerializer,
     TokenSerializer, UserProfileUpdateSerializer, VerifyOTPSerializer
 )
 
@@ -101,4 +101,20 @@ class UserManagementViewSet(ViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response({'detail': 'Password has been reset'}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], url_path='change-password')
+    def change_password(self, request):
+        """Change user's password."""
+        serializer = PasswordChangeSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        
+        if serializer.is_valid():
+            user = request.user
+            user.set_password(serializer.validated_data['new_password'])
+            user.save()
+            return Response({"message": "Password changed successfully."}, status=status.HTTP_200_OK)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

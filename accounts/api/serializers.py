@@ -137,6 +137,23 @@ class PasswordResetSerializer(serializers.Serializer):
             # logger.error(f'Error sending password reset email: {str(e)}')
             raise serializers.ValidationError('Failed to send password reset email. Please try again later.')
 
+class PasswordChangeSerializer(serializers.Serializer):
+    """Serializer for password change."""
+    current_password = serializers.CharField(required=True, write_only=True)
+    new_password = serializers.CharField(required=True, write_only=True)
+    confirm_password = serializers.CharField(required=True, write_only=True)
+    
+    def validate(self, data):
+        if data['new_password'] != data['confirm_password']:
+            raise serializers.ValidationError({"confirm_password": "New password fields didn't match."})
+        return data
+    
+    def validate_current_password(self, value):
+        user = self.context['request'].user
+        if not user.check_password(value):
+            raise serializers.ValidationError("Current password is incorrect.")
+        return value
+    
 class PasswordResetConfirmSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True)
     uid = serializers.CharField()
