@@ -8,6 +8,12 @@ from django.conf import settings
 from accounts.models import CustomUser, Profile
 from accounts.utils import OTPManager
 
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'role', 'is_active']
+        read_only_fields = ['id', 'is_active']
 class RegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
