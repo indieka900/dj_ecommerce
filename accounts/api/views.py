@@ -71,18 +71,35 @@ class UserManagementViewSet(ViewSet):
 
     @action(detail=False, methods=['get', 'put'], url_path='profile', permission_classes=[IsAuthenticated])
     def update_profile(self, request):
+        # Determine which user's profile to update
+        target_user_id = request.query_params.get('user_id')
+        is_admin = request.user.role == 'Administrator'
+        
+        if target_user_id and is_admin:
+            try:
+                target_user = CustomUser.objects.get(id=target_user_id)
+            except CustomUser.DoesNotExist:
+                return Response({"error": f"User {target_user_id} not found."}, 
+                            status=status.HTTP_404_NOT_FOUND)
+        elif target_user_id and not is_admin:
+            return Response(
+                {"error": "You don't have permission to update other users' profiles."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        else:
+            target_user = request.user
+        
         if request.method == 'GET':
             serializer = UserProfileUpdateSerializer(
-                request.user, 
+                target_user, 
                 context={'request': request}
             )
             return Response(serializer.data)
 
         elif request.method == 'PUT' or request.method == 'PATCH':
             # Handle the profile update
-            """Update current user's profile information."""
             serializer = UserProfileUpdateSerializer(
-                request.user,
+                target_user,
                 data=request.data,
                 partial=True,
                 context={'request': request}
