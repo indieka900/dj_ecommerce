@@ -2,6 +2,7 @@ from blogs.models import Blog, Comment, BlogCategory
 from .serializers import BlogSerializer, CommentSerializer, BlogCategorySerializer
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from appcontent.utils import IsAdminUserOrReadOnly
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
@@ -10,7 +11,7 @@ from rest_framework.decorators import action
 class BlogViewSet(ModelViewSet):
     queryset = Blog.objects.all()
     serializer_class = BlogSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAdminUserOrReadOnly]
     
     def get_queryset(self):
         queryset = super().get_queryset()

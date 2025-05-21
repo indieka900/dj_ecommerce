@@ -15,11 +15,16 @@ class BlogSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'author',  'category', 'image' , 'date_posted', 'slug', 'content',]
         read_only_fields = ['id', 'date_posted', 'slug']
         
-    def get_category(self, obj):
+    def get_category(self, obj :Blog):
         return obj.category.category
         
 class CommentSerializer(serializers.ModelSerializer):
+    blog = serializers.SerializerMethodField(read_only=True)
+    
     class Meta:
         model = Comment
         fields = ['id', 'blog', 'full_name', 'email', 'website', 'text', 'added_at']
         read_only_fields = ['id', 'added_at']
+        
+    def get_blog(self, obj: Comment):
+        return obj.blog.title
