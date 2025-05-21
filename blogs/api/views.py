@@ -37,3 +37,11 @@ class CommentViewSet(ModelViewSet):
         if blog_id:
             queryset = queryset.filter(blog__id=blog_id)
         return queryset
+    
+    def perform_create(self, serializer):
+        blog_id = self.request.query_params.get('blog')
+        if blog_id:
+            blog = Blog.objects.get(id=blog_id)
+            serializer.save(blog=blog)
+        else:
+            serializer.save()
