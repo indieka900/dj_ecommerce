@@ -5,8 +5,8 @@ from django.db.models import Sum, Count
 from django.utils import timezone
 from datetime import timedelta
 from rest_framework.permissions import AllowAny
-from django.db import models
 # from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
 from appcontent.utils import IsAdminUserOrReadOnly
 from payments.api.serializers import TransactionSerializer
 from payments.models import Transaction
@@ -14,25 +14,32 @@ from payments.models import Transaction
 class TransactionViewSet(viewsets.ViewSet):
     queryset = Transaction.objects.all()
     serializer_class = TransactionSerializer
-    permission_classes = [AllowAny]  # Change to IsAuthenticated for user-specific actions
-    # permission_classes = [IsAdminUserOrReadOnly]
+    permission_classes = [AllowAny]
     # filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['status', 'payment_method', 'user', 'order', 'timestamp', 'transaction_date']
     search_fields = ['receipt_number', 'transaction_id', 'description', 'phone_number']
     ordering_fields = ['timestamp', 'transaction_date', 'amount']
-    ordering = ['-timestamp']  # Default ordering
+    ordering = ['-timestamp']
 
     def list(self, request):
         queryset = self.queryset.all()
         
+        paginator = PageNumberPagination()
+        paginator.page_size = 10  
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+        
+        if paginated_queryset is not None:
+            serializer = self.serializer_class(paginated_queryset, many=True)
+            return paginator.get_paginated_response(serializer.data)
             
         serializer = self.serializer_class(queryset, many=True)
         return Response(serializer.data)
         
-    '''def filter_queryset(self, queryset):
-        for backend in list(self.filter_backends):
-            queryset = backend().filter_queryset(self.request, queryset, self)
-        return queryset'''
+    def filter_queryset(self, queryset):
+        # Manual filtering
+        for backend in self.filter_backends:
+            queryset = backend().filter_queryset(self.request, queryset, view=self)
+        return queryset
 
     def retrieve(self, request, pk=None):
         try:
@@ -45,7 +52,6 @@ class TransactionViewSet(viewsets.ViewSet):
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            # Ensure the transaction is associated with the current user if not specified
             if not request.data.get('user') and request.user.is_authenticated:
                 serializer.save(user=request.user)
             else:
@@ -83,19 +89,27 @@ class TransactionViewSet(viewsets.ViewSet):
         except Transaction.DoesNotExist:
             return Response({"detail": "Transaction not found."}, status=status.HTTP_404_NOT_FOUND)
     
-    # Additional useful actions tailored to your Transaction model
+    # Helper method for pagination
+    def paginate_results(self, queryset, request):
+        paginator = PageNumberPagination()
+        paginator.page_size = 10  # Customize as needed
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+        
+        if paginated_queryset is not None:
+            serializer = self.serializer_class(paginated_queryset, many=True)
+            return paginator.get_paginated_response(serializer.data)
+            
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
+    
+    # Additional useful actions
     
     @action(detail=False, methods=['get'])
     def recent(self, request):
         """Get recent transactions (last 7 days)"""
         week_ago = timezone.now() - timedelta(days=7)
         recent_transactions = self.queryset.filter(timestamp__gte=week_ago).order_by('-timestamp')
-        '''page = self.paginate_queryset(recent_transactions)
-        if page is not None:
-            serializer = self.serializer_class(page, many=True)
-            return self.get_paginated_response(serializer.data)'''
-        serializer = self.serializer_class(recent_transactions, many=True)
-        return Response(serializer.data)
+        return self.paginate_results(recent_transactions, request)
     
     @action(detail=False, methods=['get'])
     def payment_methods(self, request):
@@ -148,12 +162,7 @@ class TransactionViewSet(viewsets.ViewSet):
             return Response({"detail": "Authentication required."}, status=status.HTTP_401_UNAUTHORIZED)
             
         user_transactions = self.queryset.filter(user=request.user).order_by('-timestamp')
-        page = self.paginate_queryset(user_transactions)
-        if page is not None:
-            serializer = self.serializer_class(page, many=True)
-            return self.get_paginated_response(serializer.data)
-        serializer = self.serializer_class(user_transactions, many=True)
-        return Response(serializer.data)
+        return self.paginate_results(user_transactions, request)
     
     @action(detail=False, methods=['get'])
     def by_order(self, request):
@@ -189,13 +198,7 @@ class TransactionViewSet(viewsets.ViewSet):
             }
             
             transactions = self.queryset.filter(**filter_kwargs).order_by(f'-{date_field}')
-            
-            page = self.paginate_queryset(transactions)
-            if page is not None:
-                serializer = self.serializer_class(page, many=True)
-                return self.get_paginated_response(serializer.data)
-            serializer = self.serializer_class(transactions, many=True)
-            return Response(serializer.data)
+            return self.paginate_results(transactions, request)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
     
@@ -210,14 +213,13 @@ class TransactionViewSet(viewsets.ViewSet):
         phone = phone.replace(' ', '').replace('-', '')
         transactions = self.queryset.filter(phone_number__icontains=phone).order_by('-timestamp')
         
-        serializer = self.serializer_class(transactions, many=True)
-        return Response(serializer.data)
+        return self.paginate_results(transactions, request)
     
     @action(detail=False, methods=['get'])
     def statistics(self, request):
         """Get transaction statistics"""
         # Default to last 30 days if not specified
-        days = int(request.query_params.get('days', 240))
+        days = int(request.query_params.get('days', 30))
         date_from = timezone.now() - timedelta(days=days)
         
         # Basic stats
