@@ -41,7 +41,6 @@ class LoginSerializer(serializers.Serializer):
         return data
 
 class UserProfileUpdateSerializer(serializers.ModelSerializer):
-    # Profile fields
     country = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     city = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     street_address = serializers.CharField(required=False, allow_blank=True, allow_null=True)
@@ -50,10 +49,10 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = [
-            'id', 'email', 'first_name', 'last_name', 'phone_number',
-            'country', 'city', 'street_address', 'profile_picture',
+            'id', 'email', 'first_name', 'last_name', 'role', 'phone_number',
+            'country', 'city', 'street_address', 'profile_picture', 'is_active', 'is_staff', 'is_superuser'
         ]
-        read_only_fields = ['email']
+        read_only_fields = ['email', 'role', 'is_active', 'is_staff', 'is_superuser']
 
     def to_representation(self, instance):
         """Add profile info to the representation."""

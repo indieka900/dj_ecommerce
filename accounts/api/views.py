@@ -127,3 +127,58 @@ class UserManagementViewSet(ViewSet):
             return Response({"message": "Password changed successfully."}, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    @action(detail=False, methods=['post'], url_path='change-role', permission_classes=[IsAuthenticated])
+    def change_role(self, request):
+        """Change user's role.
+        
+        Only administrators are allowed to change roles.
+        """
+        # Check if the requesting user is an administrator
+        if not request.user.is_superuser:
+            return Response(
+                {"error": "You do not have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        user_id = request.data.get('user_id')
+        new_role = request.data.get('new_role')
+        
+        if not user_id:
+            return Response({"error": "User ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            user = CustomUser.objects.get(id=user_id)
+        except CustomUser.DoesNotExist:
+            return Response({"error": f"User {user_id} not found."}, status=status.HTTP_404_NOT_FOUND)
+            
+        # If new_role is provided, use it directly
+        if new_role:
+            if new_role not in ['Customer', 'Administrator']:
+                return Response(
+                    {"error": "Invalid role. Must be 'Customer' or 'Administrator'."}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            user.role = new_role
+            
+        else:
+            
+            if user.role == 'Administrator':
+                user.role = 'Customer'
+            else:
+                user.role = 'Administrator'
+        
+        # Update permissions based on the role
+        if user.role == 'Administrator':
+            user.is_staff = True
+            user.is_superuser = True
+        else:
+            user.is_staff = False
+            user.is_superuser = False
+            
+        user.save()
+        
+        return Response({
+            "message": "User role changed successfully.", 
+            "user_id": user_id,
+            "new_role": user.role
+        }, status=status.HTTP_200_OK)
