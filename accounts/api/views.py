@@ -119,7 +119,7 @@ class UserManagementViewSet(ViewSet):
         if serializer.is_valid():
             serializer.save()
             return Response({'detail': 'Password reset email sent'}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'detail': 'Password reset email not sent'}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=False, methods=['post'], url_path='password-reset-confirm')
     def password_reset_confirm(self, request):

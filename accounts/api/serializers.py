@@ -121,7 +121,7 @@ class PasswordResetSerializer(serializers.Serializer):
         
         print(f"{uid}\n{token}")
         
-        password_reset_url = f"{settings.FRONTEND_URL}/reset-password/{uid}/{token}"
+        password_reset_url = f"{settings.FRONTEND_URL}reset-password/{uid}/{token}"
 
         try:
             send_mail(
