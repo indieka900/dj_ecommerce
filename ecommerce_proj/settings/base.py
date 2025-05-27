@@ -20,6 +20,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['9762-102-140-250-158.ngrok-free.app', '*']
 
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+
 
 # Application definition
 
