@@ -65,7 +65,7 @@ def blog(request, slug):
             comment = form.save(commit=False)
             comment.blog = current_blog
             comment.save()
-            return redirect('blog_detail', slug=slug)
+            return redirect('blog-detail-', slug=slug)
     
     comments = Comment.objects.filter(blog=current_blog).order_by('-added_at')
     
