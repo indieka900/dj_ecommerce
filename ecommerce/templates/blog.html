@@ -15,18 +15,18 @@ Blogs
                 {% for blog in blogs %}
                 <div class="blog-post u-s-m-b-80">
                     <div class="blog-post-wrapper u-s-m-b-26">
-                        <a class="blog-post-anchor" href="{% url 'blog-detail' blog.slug %}">
+                        <a class="blog-post-anchor" href="{% url 'blog-detail-' blog.slug %}">
                             <img class="img-fluid" src="{{blog.image.url}}" alt="Blog post 1">
                         </a>
                     </div>
                     <h1 class="blog-post-heading u-s-m-b-13">
-                        <a href="{% url 'blog-detail' blog.slug %}">{{blog.title}}</a>
+                        <a href="{% url 'blog-detail-' blog.slug %}">{{blog.title}}</a>
                     </h1>
                     <div class="blog-post-info u-s-m-b-13">
                         <span class="blog-post-preposition">By</span>
-                        <a class="blog-post-author-name" href="{% url 'blog-detail' blog.slug %}">{{blog.author}}</a>
+                        <a class="blog-post-author-name" href="{% url 'blog-detail-' blog.slug %}">{{blog.author}}</a>
                         <span class="blog-post-info-separator">/</span>
-                        <a class="blog-post-comment" href="{% url 'blog-detail' blog.slug %}">Comments (6)</a>
+                        <a class="blog-post-comment" href="{% url 'blog-detail-' blog.slug %}">Comments (6)</a>
                         <span class="blog-post-info-separator">/</span>
                         <span class="blog-post-published-date">
                             <span>{{ blog.date_posted|date:"d" }}</span>/

@@ -1,11 +1,30 @@
 from blogs.models import Blog, Comment, BlogCategory
-from .serializers import BlogSerializer, CommentSerializer, BlogCategorySerializer
+from .serializers import (
+    BlogSerializer, CommentSerializer, BlogCategorySerializer, 
+    BlogCategoryListSerializer
+)
+from django.db.models import Count
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from appcontent.utils import IsAdminUserOrReadOnly
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
+
+class BlogCategoryViewSet(ModelViewSet):
+    queryset = BlogCategory.objects.all()
+    serializer_class = BlogCategoryListSerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    
+    def get_queryset(self):
+        """
+        Override queryset to include blog count for GET requests
+        """
+        if self.action in ['list', 'retrieve', 'create', 'update', 'partial_update', 'destroy']:
+            return BlogCategory.objects.annotate(
+                blog_count=Count('blog_category') 
+            )
+        return super().get_queryset()
 
 
 class BlogViewSet(ModelViewSet):
@@ -24,7 +43,8 @@ class BlogViewSet(ModelViewSet):
     def latest(self, request):
         latest_blogs = self.get_queryset().order_by('-date_posted')[:5]
         serializer = self.get_serializer(latest_blogs, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
     
 class CommentViewSet(ModelViewSet):
     queryset = Comment.objects.all()
