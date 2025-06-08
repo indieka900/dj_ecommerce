@@ -138,7 +138,6 @@ class PasswordResetSerializer(serializers.Serializer):
 
 class PasswordChangeSerializer(serializers.Serializer):
     """Serializer for password change."""
-    current_password = serializers.CharField(required=True, write_only=True)
     new_password = serializers.CharField(required=True, write_only=True)
     confirm_password = serializers.CharField(required=True, write_only=True)
     
@@ -147,11 +146,7 @@ class PasswordChangeSerializer(serializers.Serializer):
             raise serializers.ValidationError({"confirm_password": "New password fields didn't match."})
         return data
     
-    def validate_current_password(self, value):
-        user = self.context['request'].user
-        if not user.check_password(value):
-            raise serializers.ValidationError("Current password is incorrect.")
-        return value
+    
     
 class PasswordResetConfirmSerializer(serializers.Serializer):
     new_password = serializers.CharField(write_only=True)
