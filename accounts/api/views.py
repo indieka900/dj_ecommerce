@@ -8,7 +8,7 @@ from ..signals import send_otp_email
 from rest_framework.decorators import action
 from .serializers import (
     PasswordChangeSerializer, PasswordResetConfirmSerializer, PasswordResetSerializer, RegistrationSerializer, LoginSerializer,
-    TokenSerializer, UserProfileUpdateSerializer, VerifyOTPSerializer
+    TokenSerializer, UserProfileUpdateSerializer, VerifyOTPSerializer, AddAdminSerializer
 )
 
 class UserManagementViewSet(ViewSet):
@@ -145,6 +145,25 @@ class UserManagementViewSet(ViewSet):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
+    @action(detail=False, methods=['post'], url_path='add-admin', permission_classes=[IsAuthenticated])
+    def add_admin(self, request):
+        """Allow a superuser to add a new administrator."""
+        if not request.user.is_superuser:
+            return Response(
+                {"error": "You do not have permission to perform this action."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        serializer = AddAdminSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({
+                "message": "Administrator added successfully.",
+                "user": UserProfileUpdateSerializer(user, context={'request': request}).data
+            }, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
     @action(detail=False, methods=['post'], url_path='change-role', permission_classes=[IsAuthenticated])
     def change_role(self, request):
         """Change user's role.
@@ -184,7 +203,6 @@ class UserManagementViewSet(ViewSet):
             else:
                 user.role = 'Administrator'
         
-        # Update permissions based on the role
         if user.role == 'Administrator':
             user.is_staff = True
             user.is_superuser = True

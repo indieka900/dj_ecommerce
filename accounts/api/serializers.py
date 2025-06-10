@@ -183,4 +183,40 @@ class TokenSerializer(serializers.Serializer):
     """
     refresh = serializers.CharField()
     access = serializers.CharField()
-    user_role = serializers.CharField()      
+    user_role = serializers.CharField()  
+    
+class AddAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('email', 'role')
+        extra_kwargs = {
+            'email': {'required': True},
+            'role': {'read_only': True}
+        }
+
+    def create(self, validated_data):
+        # Force the role to 'Administrator' regardless of input
+        validated_data['role'] = 'Administrator'
+        user = CustomUser.objects.create_user(**validated_data)
+        user.is_staff = True
+        user.save()
+
+        self.send_password_setup_email(user)
+        return user
+
+    def send_password_setup_email(self, user):
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        reset_url = f"{settings.FRONTEND_URL}reset-password/{uid}/{token}"
+
+        try:
+            send_mail(
+                'Administrator Account Created',
+                f'You have been added as an administrator.\nPlease set your password using the link below:\n{reset_url}',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"Error sending password setup email: {str(e)}")
+            raise serializers.ValidationError("Failed to send password setup email. Please try again.")
