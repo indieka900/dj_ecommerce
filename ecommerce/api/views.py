@@ -1,9 +1,14 @@
 from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework import status
+from django.db import transaction
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from ecommerce.models import Brand, Category, Product, Review, Order, Cart, Wishlist, ProductImage, ProductVariant
 from .serializers import (
     BrandSerializer, CategorySerializer, ProductSerializer, ReviewSerializer, 
-    OrderSerializer, CartSerializer, WishlistSerializer, ProductImageSerializer, ProductVariantSerializer
+    OrderSerializer, CartSerializer, WishlistSerializer, ProductImageSerializer, 
+    ProductVariantSerializer, BulkProductImageSerializer
 )
 from appcontent.utils import IsAdminUserOrReadOnly
 from django.db.models import Sum
@@ -74,6 +79,125 @@ class ProductImageViewSet(viewsets.ModelViewSet):
         except Product.DoesNotExist:
             raise ValueError("Product with the specified ID does not exist.")
         serializer.save(product=product)
+        
+    @action(detail=False, methods=['post'], url_path='bulk-upload')
+    def bulk_upload(self, request):
+        """
+        Bulk upload multiple images for a product
+        
+        Expected payload:
+        {
+            "product": 1,
+            "images": [image1, image2, image3, ...],
+            "alt_texts": ["Alt text 1", "Alt text 2", "Alt text 3", ...] (optional)
+        }
+        """
+        try:
+            serializer = BulkProductImageSerializer(data=request.data)
+            
+            if serializer.is_valid():
+                with transaction.atomic():
+                    created_images = serializer.save()
+                
+                # Serialize the created images for response
+                response_serializer = ProductImageSerializer(created_images, many=True)
+                
+                return Response({
+                    'message': f'Successfully uploaded {len(created_images)} images',
+                    'images': response_serializer.data
+                }, status=status.HTTP_201_CREATED)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            return Response(
+                {'error': f'Error uploading images: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            
+    @action(detail=False, methods=['post'], url_path='bulk-upload-form')
+    def bulk_upload_form(self, request):
+        """
+        Alternative bulk upload endpoint that handles form data
+        Useful when uploading from HTML forms or when images are sent as separate fields
+        
+        Expected form data:
+        - product: 1
+        - image_1: file
+        - image_2: file
+        - image_3: file
+        - alt_text_1: "Alt text 1" (optional)
+        - alt_text_2: "Alt text 2" (optional)
+        - alt_text_3: "Alt text 3" (optional)
+        """
+        try:
+            product_id = request.data.get('product')
+            if not product_id:
+                return Response(
+                    {'error': 'Product ID is required'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            try:
+                product = Product.objects.get(id=product_id)
+            except Product.DoesNotExist:
+                return Response(
+                    {'error': 'Product with the specified ID does not exist'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Extract images and alt texts from form data
+            images = []
+            alt_texts = []
+            
+            # Look for image fields (image_1, image_2, etc.)
+            for key, value in request.data.items():
+                if key.startswith('image_') and hasattr(value, 'read'):
+                    images.append(value)
+                    
+                    # Look for corresponding alt text
+                    alt_key = key.replace('image_', 'alt_text_')
+                    alt_text = request.data.get(alt_key, '')
+                    alt_texts.append(alt_text)
+
+            if not images:
+                return Response(
+                    {'error': 'No images provided'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if len(images) > 10:
+                return Response(
+                    {'error': 'Maximum 10 images allowed per request'}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            created_images = []
+            
+            with transaction.atomic():
+                for i, image in enumerate(images):
+                    alt_text = alt_texts[i] if i < len(alt_texts) else ''
+                    
+                    product_image = ProductImage.objects.create(
+                        product=product,
+                        image=image,
+                        alt_text=alt_text
+                    )
+                    created_images.append(product_image)
+
+            # Serialize the created images for response
+            response_serializer = ProductImageSerializer(created_images, many=True)
+            
+            return Response({
+                'message': f'Successfully uploaded {len(created_images)} images',
+                'images': response_serializer.data
+            }, status=status.HTTP_201_CREATED)
+
+        except Exception as e:
+            return Response(
+                {'error': f'Error uploading images: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
     
 class ProductVariantViewSet(viewsets.ModelViewSet):
     queryset = ProductVariant.objects.all()

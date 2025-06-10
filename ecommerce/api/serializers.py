@@ -19,6 +19,62 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = ProductImage
         fields = ['product','image', 'alt_text']
         read_only_fields = ['product']
+        
+class BulkProductImageSerializer(serializers.Serializer):
+    """Serializer for bulk image upload"""
+    product = serializers.IntegerField()
+    images = serializers.ListField(
+        child=serializers.ImageField(),
+        min_length=1,
+        max_length=10,  # Limit to 10 images per request
+        help_text="List of images to upload (max 10)"
+    )
+    alt_texts = serializers.ListField(
+        child=serializers.CharField(max_length=255, required=False, allow_blank=True),
+        required=False,
+        help_text="Optional list of alt texts corresponding to each image"
+    )
+
+    def validate_product(self, value):
+        """Validate that the product exists"""
+        try:
+            Product.objects.get(id=value)
+            return value
+        except Product.DoesNotExist:
+            raise serializers.ValidationError("Product with the specified ID does not exist.")
+
+    def validate(self, data):
+        """Validate that alt_texts length matches images length if provided"""
+        images = data.get('images', [])
+        alt_texts = data.get('alt_texts', [])
+        
+        if alt_texts and len(alt_texts) != len(images):
+            raise serializers.ValidationError(
+                "Number of alt texts must match number of images if provided."
+            )
+        
+        return data
+
+    def create(self, validated_data):
+        """Create multiple ProductImage instances"""
+        product_id = validated_data['product']
+        images = validated_data['images']
+        alt_texts = validated_data.get('alt_texts', [])
+        
+        product = Product.objects.get(id=product_id)
+        created_images = []
+        
+        for i, image in enumerate(images):
+            alt_text = alt_texts[i] if i < len(alt_texts) else ""
+            
+            product_image = ProductImage.objects.create(
+                product=product,
+                image=image,
+                alt_text=alt_text
+            )
+            created_images.append(product_image)
+        
+        return created_images
 
 class ProductVariantSerializer(serializers.ModelSerializer):
     class Meta:
