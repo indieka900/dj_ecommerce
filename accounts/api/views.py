@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from accounts.models import CustomUser
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.viewsets import ViewSet
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from ..signals import send_otp_email
 from rest_framework.decorators import action
 from .serializers import (
@@ -26,7 +26,7 @@ class UserManagementViewSet(ViewSet):
             }, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=False, methods=['get'], url_path='all-users', permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['get'], url_path='all-users', permission_classes=[IsAdminUser])
     def all_users(self, request):
         """Get all users."""
         users = self.queryset.all()
