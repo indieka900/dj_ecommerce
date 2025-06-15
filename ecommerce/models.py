@@ -106,11 +106,13 @@ class Product(models.Model):
     )
 
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)  # Save initial data to get access to related objects
+
         # Update min and max variant prices if variants exist
         if self.variants.exists():
             variant_prices = self.variants.values_list('variant_price', flat=True)
             variant_prices = [p for p in variant_prices if p is not None]
-            
+
             if variant_prices:
                 self.has_variants = True
                 self.min_variant_price = min(variant_prices)
@@ -119,9 +121,19 @@ class Product(models.Model):
                 self.has_variants = False
                 self.min_variant_price = None
                 self.max_variant_price = None
-        
-        super().save(*args, **kwargs)
-        
+        else:
+            self.has_variants = False
+            self.min_variant_price = None
+            self.max_variant_price = None
+
+        # Save again to persist updated variant-related fields
+        super().save(update_fields=[
+            'has_variants',
+            'min_variant_price',
+            'max_variant_price'
+        ])
+
+
     def calculate_selling_price(self, custom_discount=None, variant_price=None):
         """
         Calculate selling price considering variants and discounts

@@ -1,18 +1,25 @@
 from rest_framework import serializers
 from ecommerce.models import (
-    Brand, Category, Product, Review, Order, 
+    Brand, Category, Product, Review, Order, ParentCategory,
     OrderItem, Cart, CartItem, Wishlist, ProductImage, ProductVariant
 )
 
+class ParentCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ParentCategory
+        fields = '__all__'
 class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = ['id', 'brand_title', 'slug']
 
 class CategorySerializer(serializers.ModelSerializer):
+    parent_category = serializers.CharField(source='parent_category.parent_name', read_only=True)
+    product_count = serializers.IntegerField(read_only=True)
     class Meta:
         model = Category
-        fields = ['id', 'category_name', 'slug', 'parent']
+        fields = ['id', 'category_name', 'slug', 'parent_category', 'product_count']
+        
 
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,11 +96,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Product
-        fields = [
-            'id', 'category', 'category_name', 'brand','brand_name', 'title', 'price', 'featured',
-            'discount', 'quantity', 'description', 'keywords', 'created_at', 
-            'updated_at', 'images', 'variants'
-        ]
+        fields = '__all__'
+        
+    '''
+    def get_category_name(self, obj:Product):
+        return f"{obj.category.category_name} for {obj.category.parent_category.parent_name}"
+    '''
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review

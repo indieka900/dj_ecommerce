@@ -4,15 +4,20 @@ from rest_framework import status
 from django.db import transaction
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from ecommerce.models import Brand, Category, Product, Review, Order, Cart, Wishlist, ProductImage, ProductVariant
+from ecommerce.models import Brand, Category, Product, Review, Order, Cart, Wishlist, ProductImage, ProductVariant, ParentCategory
 from .serializers import (
     BrandSerializer, CategorySerializer, ProductSerializer, ReviewSerializer, 
     OrderSerializer, CartSerializer, WishlistSerializer, ProductImageSerializer, 
-    ProductVariantSerializer, BulkProductImageSerializer
+    ProductVariantSerializer, BulkProductImageSerializer, ParentCategorySerializer
 )
 from appcontent.utils import IsAdminUserOrReadOnly
-from django.db.models import Sum
+from django.db.models import Sum, Count
 
+class ParendCategoryViewSet(viewsets.ModelViewSet):
+    queryset = ParentCategory.objects.all()
+    serializer_class = ParentCategorySerializer
+    permission_classes = [IsAdminUserOrReadOnly]
+    
 class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
@@ -22,6 +27,16 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = [AllowAny]
+    
+    def get_queryset(self):
+        """
+        Override queryset to include blog count for GET requests
+        """
+        if self.action in ['list', 'retrieve', 'create', 'update', 'partial_update', 'destroy']:
+            return Category.objects.annotate(
+                product_count=Count('product') 
+            )
+        return super().get_queryset()
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.prefetch_related('variants', 'images').all()
