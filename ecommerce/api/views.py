@@ -22,6 +22,16 @@ class BrandViewSet(viewsets.ModelViewSet):
     queryset = Brand.objects.all()
     serializer_class = BrandSerializer
     permission_classes = [IsAdminUserOrReadOnly]
+    
+    def get_queryset(self):
+        """
+        Override queryset to include product count for GET requests
+        """
+        if self.action in ['list', 'retrieve', 'create', 'update', 'partial_update', 'destroy']:
+            return Brand.objects.annotate(
+                product_count=Count('product_brand') 
+            )
+        return super().get_queryset()
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -30,7 +40,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         """
-        Override queryset to include blog count for GET requests
+        Override queryset to include product count for GET requests
         """
         if self.action in ['list', 'retrieve', 'create', 'update', 'partial_update', 'destroy']:
             return Category.objects.annotate(

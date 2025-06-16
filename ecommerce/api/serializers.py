@@ -9,9 +9,10 @@ class ParentCategorySerializer(serializers.ModelSerializer):
         model = ParentCategory
         fields = '__all__'
 class BrandSerializer(serializers.ModelSerializer):
+    product_count = serializers.IntegerField(read_only=True)
     class Meta:
         model = Brand
-        fields = ['id', 'brand_title', 'slug']
+        fields = ['id', 'brand_title', 'product_count']
 
 class CategorySerializer(serializers.ModelSerializer):
     parent_category = serializers.CharField(source='parent_category.parent_name', read_only=True)
