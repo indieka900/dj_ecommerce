@@ -49,8 +49,7 @@ class ParentCategory(models.Model):
     slug = models.SlugField(unique=True, blank=True)
     
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.parent_name)
+        self.slug = slugify(self.parent_name)
         super().save(*args, **kwargs)
     
     def __str__(self):
@@ -65,8 +64,7 @@ class Category(models.Model):
     slug = models.SlugField(unique=True,  blank=True)
     
     def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(f"{self.category_name} for {self.parent_category.parent_name}")
+        self.slug = slugify(f"{self.category_name} for {self.parent_category.parent_name}")
         super().save(*args, **kwargs)
     
     def __str__(self):
