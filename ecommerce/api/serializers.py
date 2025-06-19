@@ -25,8 +25,8 @@ class CategorySerializer(serializers.ModelSerializer):
 class ProductImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProductImage
-        fields = ['product','image', 'alt_text']
-        read_only_fields = ['product']
+        fields = ['id', 'product','image', 'alt_text']
+        read_only_fields = ['product','id']
         
 class BulkProductImageSerializer(serializers.Serializer):
     """Serializer for bulk image upload"""
