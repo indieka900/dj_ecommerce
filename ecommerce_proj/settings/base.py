@@ -1,6 +1,5 @@
 from datetime import timedelta
 from pathlib import Path
-import socket
 import os
 from dotenv import load_dotenv
 
@@ -18,7 +17,7 @@ SECRET_KEY = 'django-insecure-3fkp0m^xnffb-@^al^algzx__*!&^-a4esqmm548i2^9-!y7k&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['9762-102-140-250-158.ngrok-free.app', '*']
+ALLOWED_HOSTS = ['*']
 
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
 
