@@ -4,7 +4,10 @@ from rest_framework import status
 from django.db import transaction
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from ecommerce.models import Brand, Category, Product, Review, Order, Cart, Wishlist, ProductImage, ProductVariant, ParentCategory
+from ecommerce.models import (
+    Brand, Category, Product, Review, Order, Cart, 
+    Wishlist, ProductImage, ProductVariant, ParentCategory
+)
 from .serializers import (
     BrandSerializer, CategorySerializer, ProductSerializer, ReviewSerializer, 
     OrderSerializer, CartSerializer, WishlistSerializer, ProductImageSerializer, 
@@ -36,7 +39,7 @@ class BrandViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUserOrReadOnly]
     
     def get_queryset(self):
         """
@@ -51,7 +54,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.prefetch_related('variants', 'images').all()
     serializer_class = ProductSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAdminUserOrReadOnly]
 
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
@@ -239,3 +242,29 @@ class ProductVariantViewSet(viewsets.ModelViewSet):
         if not product:
             raise ValueError("Product must be specified for the variant.")
         serializer.save(product_id=product)
+        
+    @action(detail=False, methods=['get'], url_path='product-variants')
+    def product_variants(self, request):
+        """
+        Get all variants for a specific product
+
+        Example: GET /api/product-variants/?product=1
+        """
+        product_id = request.query_params.get('product')
+        if not product_id:
+            return Response(
+                {'error': 'Product ID is required'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            product = Product.objects.get(id=product_id)
+            variants = ProductVariant.objects.filter(product=product)
+            serializer = self.get_serializer(variants, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Product.DoesNotExist:
+            return Response(
+                {'error': 'Product with the specified ID does not exist'}, 
+                status=status.HTTP_404_NOT_FOUND
+            )

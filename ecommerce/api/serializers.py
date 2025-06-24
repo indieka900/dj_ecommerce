@@ -85,9 +85,13 @@ class BulkProductImageSerializer(serializers.Serializer):
         return created_images
 
 class ProductVariantSerializer(serializers.ModelSerializer):
+    selling_price = serializers.SerializerMethodField()
     class Meta:
         model = ProductVariant
-        fields = ['size', 'stock', 'color', 'variant_price']
+        fields = ['size', 'stock', 'color', 'variant_price', 'selling_price', 'id']
+        
+    def get_selling_price(self, obj):
+        return obj.selling_price
 
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)  
