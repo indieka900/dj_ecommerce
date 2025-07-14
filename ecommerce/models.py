@@ -115,14 +115,14 @@ class Product(models.Model):
                 self.has_variants = True
                 self.min_variant_price = min(variant_prices)
                 self.max_variant_price = max(variant_prices)
-            else:
-                self.has_variants = False
-                self.min_variant_price = None
-                self.max_variant_price = None
-        else:
-            self.has_variants = False
-            self.min_variant_price = None
-            self.max_variant_price = None
+        #     else:
+        #         self.has_variants = False
+        #         self.min_variant_price = None
+        #         self.max_variant_price = None
+        # else:
+        #     self.has_variants = False
+        #     self.min_variant_price = None
+        #     self.max_variant_price = None
 
         # Save again to persist updated variant-related fields
         super().save(update_fields=[
