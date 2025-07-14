@@ -364,7 +364,7 @@ class RevenueAnalyticsView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
     
     def get(self, request):
-        period = request.query_params.get('period', 'monthly')  # daily, monthly, yearly
+        period = request.query_params.get('period', 'monthly')
         year = int(request.query_params.get('year', timezone.now().year))
         
         orders = Order.objects.filter(

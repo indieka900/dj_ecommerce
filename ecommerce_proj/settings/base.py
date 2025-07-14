@@ -31,12 +31,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     'corsheaders',
     'django_filters',
+    'drf_yasg',
+    'rest_framework',
+    
     'accounts',
     'ecommerce',
     'payments',
-    'rest_framework',
     'blogs',
     'appcontent.apps.AppcontentConfig',
 ]

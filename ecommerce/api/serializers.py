@@ -110,38 +110,38 @@ class ProductSerializer(serializers.ModelSerializer):
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ['id', 'product', 'user', 'review', 'rating', 'created_at']
+        fields = '__all__'
 
-class OrderItemSerializer(serializers.ModelSerializer):
-    # product = ProductSerializer(read_only=True)
-    product_name = serializers.CharField(source='product.title', read_only=True)
-    variant_name = serializers.CharField(source='variant.size', read_only=True)
+# class OrderItemSerializer(serializers.ModelSerializer):
+#     # product = ProductSerializer(read_only=True)
+#     product_name = serializers.CharField(source='product.title', read_only=True)
+#     variant_name = serializers.CharField(source='variant.size', read_only=True)
 
-    class Meta:
-        model = OrderItem
-        fields = ['product_name', 'variant_name', 'quantity', 'unit_price', 'subtotal']
+#     class Meta:
+#         model = OrderItem
+#         fields = ['product_name', 'variant_name', 'quantity', 'unit_price', 'subtotal']
 
-class OrderSerializer(serializers.ModelSerializer):
-    items = OrderItemSerializer(many=True)
-    total_items = serializers.SerializerMethodField()
+# class OrderSerializer(serializers.ModelSerializer):
+#     items = OrderItemSerializer(many=True)
+#     total_items = serializers.SerializerMethodField()
 
-    class Meta:
-        model = Order
-        fields = [
-            'id', 'user', 'status', 'total', 'shipping_address', 
-            'transaction_id', 'payment_status', 'created_at', 'updated_at', 
-            'items', 'total_items'
-        ]
+#     class Meta:
+#         model = Order
+#         fields = [
+#             'id', 'user', 'status', 'total', 'shipping_address', 
+#             'transaction_id', 'payment_status', 'created_at', 'updated_at', 
+#             'items', 'total_items'
+#         ]
 
-    def create(self, validated_data):
-        order_items_data = validated_data.pop('items')
-        order = Order.objects.create(**validated_data)
-        for item_data in order_items_data:
-            OrderItem.objects.create(order=order, **item_data)
-        return order
+#     def create(self, validated_data):
+#         order_items_data = validated_data.pop('items')
+#         order = Order.objects.create(**validated_data)
+#         for item_data in order_items_data:
+#             OrderItem.objects.create(order=order, **item_data)
+#         return order
 
-    def get_total_items(self, obj):
-        return sum(item.quantity for item in obj.items.all())
+#     def get_total_items(self, obj):
+#         return sum(item.quantity for item in obj.items.all())
     
 class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -158,4 +158,4 @@ class CartSerializer(serializers.ModelSerializer):
 class WishlistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Wishlist
-        fields = ['id', 'user', 'products', 'created_at', 'updated_at']
+        fields = ['id', 'user', 'created_at']

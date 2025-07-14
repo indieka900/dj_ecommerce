@@ -10,7 +10,7 @@ from ecommerce.models import (
 )
 from .serializers import (
     BrandSerializer, CategorySerializer, ProductSerializer, ReviewSerializer, 
-    OrderSerializer, CartSerializer, WishlistSerializer, ProductImageSerializer, 
+    CartSerializer, WishlistSerializer, ProductImageSerializer, 
     ProductVariantSerializer, BulkProductImageSerializer, ParentCategorySerializer
 )
 from appcontent.utils import IsAdminUserOrReadOnly
@@ -69,15 +69,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-class OrderViewSet(viewsets.ModelViewSet):
-    queryset = Order.objects.prefetch_related('items__product').annotate(
-        total_items=Sum('items__quantity')
-    )
-    serializer_class = OrderSerializer
-    permission_classes = [IsAuthenticated]
+# class OrderViewSet(viewsets.ModelViewSet):
+#     queryset = Order.objects.prefetch_related('items__product').annotate(
+#         total_items=Sum('items__quantity')
+#     )
+#     serializer_class = OrderSerializer
+#     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        return Order.objects.filter(user=self.request.user)
+#     def get_queryset(self):
+#         return Order.objects.filter(user=self.request.user)
 
 class CartViewSet(viewsets.ModelViewSet):
     serializer_class = CartSerializer
