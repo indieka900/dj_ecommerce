@@ -51,7 +51,7 @@ class MpesaService:
             "PartyA": phone,
             "PartyB": self.shortcode,
             "PhoneNumber": phone,
-            "CallBackURL": call_back_url,
+            "CallBackURL": 'https://5c46f0a059aa.ngrok-free.app/payment/callback',
             "AccountReference": f"Order_{order_id}",
             "TransactionDesc": "Payment for order"
         }

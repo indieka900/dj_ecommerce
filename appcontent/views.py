@@ -4,7 +4,7 @@ from appcontent.models import Faq
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
-from django.db.models import Sum, Count, Avg, Q, F, DecimalField, ExpressionWrapper
+from django.db.models import Sum, Count, Avg, Q, F, DecimalField, ExpressionWrapper, DurationField
 from django.db.models.functions import TruncDate, TruncMonth, TruncWeek, ExtractHour
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -15,12 +15,11 @@ from ecommerce.models import (
 )
 from accounts.models import CustomUser
 from payments.models import Transaction
-
 class ComprehensiveDashboardView(APIView):
     permission_classes = [IsAuthenticated, IsAdminUser]
     
     def get(self, request):
-        period = request.query_params.get('period', '30')  # Default 30 days
+        period = request.query_params.get('period', '30') 
         
         try:
             days = int(period)
@@ -34,45 +33,51 @@ class ComprehensiveDashboardView(APIView):
         prev_end_date = start_date
         prev_start_date = prev_end_date - timedelta(days=days)
         
-        # 1. REVENUE METRICS
-        revenue_metrics = self.get_revenue_metrics(start_date, end_date, prev_start_date, prev_end_date)
-        
-        # 2. ORDER METRICS
-        order_metrics = self.get_order_metrics(start_date, end_date, prev_start_date, prev_end_date)
-        
-        # 3. CUSTOMER METRICS
-        customer_metrics = self.get_customer_metrics(start_date, end_date)
-        
-        # 4. PRODUCT METRICS
-        product_metrics = self.get_product_metrics(start_date, end_date)
-        
-        # 5. REAL-TIME METRICS
-        realtime_metrics = self.get_realtime_metrics()
-        
-        # 6. CHARTS DATA
-        charts_data = self.get_charts_data(start_date, end_date)
-        
-        # 7. GEOGRAPHIC DATA
-        geographic_data = self.get_geographic_data(start_date, end_date)
-        
-        # 8. PAYMENT METRICS
-        payment_metrics = self.get_payment_metrics(start_date, end_date)
-        
-        return Response({
-            'period': {
-                'days': days,
-                'start_date': start_date.isoformat(),
-                'end_date': end_date.isoformat()
-            },
-            'revenue': revenue_metrics,
-            'orders': order_metrics,
-            'customers': customer_metrics,
-            'products': product_metrics,
-            'realtime': realtime_metrics,
-            'charts': charts_data,
-            'geographic': geographic_data,
-            'payments': payment_metrics
-        })
+        try:
+            # 1. REVENUE METRICS
+            revenue_metrics = self.get_revenue_metrics(start_date, end_date, prev_start_date, prev_end_date)
+            
+            # 2. ORDER METRICS
+            order_metrics = self.get_order_metrics(start_date, end_date, prev_start_date, prev_end_date)
+            
+            # 3. CUSTOMER METRICS
+            customer_metrics = self.get_customer_metrics(start_date, end_date)
+            
+            # 4. PRODUCT METRICS
+            product_metrics = self.get_product_metrics(start_date, end_date)
+            
+            # 5. REAL-TIME METRICS
+            realtime_metrics = self.get_realtime_metrics()
+            
+            # 6. CHARTS DATA
+            charts_data = self.get_charts_data(start_date, end_date)
+            
+            # 7. GEOGRAPHIC DATA
+            geographic_data = self.get_geographic_data(start_date, end_date)
+            
+            # 8. PAYMENT METRICS
+            payment_metrics = self.get_payment_metrics(start_date, end_date)
+            
+            return Response({
+                'period': {
+                    'days': days,
+                    'start_date': start_date.isoformat(),
+                    'end_date': end_date.isoformat()
+                },
+                'revenue': revenue_metrics,
+                'orders': order_metrics,
+                'customers': customer_metrics,
+                'products': product_metrics,
+                'realtime': realtime_metrics,
+                'charts': charts_data,
+                'geographic': geographic_data,
+                'payments': payment_metrics
+            })
+        except Exception as e:
+            return Response({
+                'error': 'Internal server error',
+                'message': str(e)
+            }, status=500)
     
     def get_revenue_metrics(self, start_date, end_date, prev_start_date, prev_end_date):
         # Current period revenue - separate queries for different aggregations
@@ -167,20 +172,48 @@ class ComprehensiveDashboardView(APIView):
         fulfilled = current_orders.filter(status='Delivered').count()
         fulfillment_rate = (fulfilled / current_count * 100) if current_count > 0 else 0
         
-        # Average processing time
         delivered_orders = current_orders.filter(
             status='Delivered',
-            paid_at__isnull=False
-        ).annotate(
-            processing_days=ExpressionWrapper(
-                F('updated_at') - F('paid_at'),
-                output_field=DecimalField()
-            )
+            paid_at__isnull=False,
+            updated_at__isnull=False
         )
         
-        avg_processing_time = delivered_orders.aggregate(
-            avg_days=Avg('processing_days')
-        )['avg_days']
+        try:
+            avg_processing_result = delivered_orders.annotate(
+                processing_time=ExpressionWrapper(
+                    F('updated_at') - F('paid_at'),
+                    output_field=DurationField()
+                )
+            ).aggregate(
+                avg_processing=Avg('processing_time')
+            )
+            
+            avg_processing_time = avg_processing_result['avg_processing']
+            
+            if avg_processing_time:
+                if hasattr(avg_processing_time, 'days'):
+                    avg_processing_days = float(avg_processing_time.days)
+                elif hasattr(avg_processing_time, 'total_seconds'):
+                    avg_processing_days = avg_processing_time.total_seconds() / (24 * 60 * 60)
+                else:
+                    # Fallback for decimal values (duration in seconds)
+                    avg_processing_days = float(avg_processing_time) / (24 * 60 * 60)
+            else:
+                avg_processing_days = 0
+                
+        except Exception:
+            # Fallback method: Calculate in Python
+            processing_times = []
+            for order in delivered_orders:
+                if order.updated_at and order.paid_at:
+                    time_diff = order.updated_at - order.paid_at
+                    processing_times.append(time_diff.total_seconds())
+            
+            if processing_times:
+                avg_seconds = sum(processing_times) / len(processing_times)
+                avg_processing_days = avg_seconds / (24 * 60 * 60)
+            else:
+                avg_processing_days = 0
         
         return {
             'total': current_count,
@@ -188,7 +221,7 @@ class ComprehensiveDashboardView(APIView):
             'status_breakdown': list(status_breakdown),
             'payment_breakdown': list(payment_breakdown),
             'fulfillment_rate': round(fulfillment_rate, 2),
-            'avg_processing_days': float(avg_processing_time.days) if avg_processing_time else 0,
+            'avg_processing_days': round(avg_processing_days, 2),
             'pending': current_orders.filter(status='Pending').count(),
             'processing': current_orders.filter(status='Processing').count(),
             'shipped': current_orders.filter(status='Shipped').count(),
@@ -324,9 +357,6 @@ class ComprehensiveDashboardView(APIView):
             updated_at__gte=timezone.now() - timedelta(days=7)
         ).count()
         
-        # Online visitors (you might need to implement visitor tracking)
-        # For now, we'll use active carts as a proxy
-        
         # Wishlist items
         wishlist_items = WishlistItem.objects.filter(
             added_at__gte=timezone.now() - timedelta(days=7)
@@ -452,7 +482,7 @@ class ComprehensiveDashboardView(APIView):
         if previous == 0:
             return 100 if current > 0 else 0
         return round(((current - previous) / previous * 100), 2)
-
+    
 def home(request):
     """
     Render home page with latest products and categories.
