@@ -35,6 +35,7 @@ class Slider(models.Model):
 class Brand(models.Model):
     brand_title = models.CharField(max_length=50, unique=True)
     slug = models.SlugField(unique=True, blank=True)
+    image = models.ImageField(upload_to="brand/images", default="brand.png")
     
     def save(self, *args, **kwargs):
         if not self.slug:

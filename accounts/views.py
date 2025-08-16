@@ -26,7 +26,6 @@ def login_user(request):
         password = request.POST.get('password')
         try:
             user= CustomUser.objects.get(email=email)
-            # user.set_password(password)
         except CustomUser.DoesNotExist:
             messages.error(request, 'email does not exist!') 
         user = authenticate(request, email=email, password=password)
@@ -38,10 +37,12 @@ def login_user(request):
                 return redirect('/')
             else:
                 messages.error(request, 'Please activate your account')
-                return redirect('/') 
+                return redirect('/accounts/account') 
         else:
             messages.error(request, 'Incorrect password')
-            return redirect('/')
+            return redirect('/accounts/account')
+    else:
+        return redirect('/accounts/account')
         
 def logout_user(request):
     logout(request)

@@ -1,0 +1,25 @@
+<div class="wrapper-content" id="product-tabs-template">
+    <div class="outer-area-tab">
+        <div class="tab-content">
+            <!-- Latest Products -->
+            <div class="tab-pane active show fade" id="{{ data.slug }}-latest">
+                {% include 'includes/product-tab-content.html' with products=data.latest_products tab_name="latest" category_name=data.parent_category.parent_name %}
+            </div>
+            
+            <!-- Best Selling Products -->
+            <div class="tab-pane fade" id="{{ data.slug }}-bestselling">
+                {% include 'includes/product-tab-content.html' with products=data.best_selling_products tab_name="best selling" category_name=data.parent_category.parent_name %}
+            </div>
+            
+            <!-- Top Rating Products -->
+            <div class="tab-pane fade" id="{{ data.slug }}-toprated">
+                {% include 'includes/product-tab-content.html' with products=data.top_rating_products tab_name="top rated" category_name=data.parent_category.parent_name %}
+            </div>
+            
+            <!-- Featured Products -->
+            <div class="tab-pane fade" id="{{ data.slug }}-featured">
+                {% include 'includes/product-tab-content.html' with products=data.featured_products tab_name="featured" category_name=data.parent_category.parent_name %}
+            </div>
+        </div>
+    </div>
+</div>

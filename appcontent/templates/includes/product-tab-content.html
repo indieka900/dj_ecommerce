@@ -1,0 +1,25 @@
+{% load category_tags %}
+{% load product_filters %}
+
+<!-- {% for category_data in parent_categories_data %}
+    {% render_category_section category_data %}
+{% endfor %} -->
+
+<div id="product-tab-content-template">
+    {% if products|has_products %}
+    <div class="slider-fouc">
+        <div class="products-slider owl-carousel" data-item="4">
+            {% for product in products %}
+            {% include 'includes/product-card.html' with item=product %}
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="product-not-found">
+        <div class="not-found">
+            <h2>SORRY!</h2>
+            <h6>No {{ tab_name }} products available in {{ category_name }}.</h6>
+        </div>
+    </div>
+    {% endif %}
+</div>
