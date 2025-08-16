@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
@@ -238,10 +239,14 @@ class ProductVariantViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
     
     def perform_create(self, serializer):
-        product = self.request.data.get('product')
+        product = self.request.data.get('product_id')
         if not product:
             raise ValueError("Product must be specified for the variant.")
-        serializer.save(product_id=product)
+        prod = get_object_or_404(Product, id=product)
+        if not prod.has_variants:
+            prod.has_variants = True
+            prod.save()
+        serializer.save(product=prod)
         
     @action(detail=False, methods=['get'], url_path='product-variants')
     def product_variants(self, request):
