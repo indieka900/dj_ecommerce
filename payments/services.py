@@ -51,7 +51,7 @@ class MpesaService:
             "PartyA": phone,
             "PartyB": self.shortcode,
             "PhoneNumber": phone,
-            "CallBackURL": 'https://5c46f0a059aa.ngrok-free.app/payment/callback',
+            "CallBackURL": 'https://2287418c5736.ngrok-free.app/payment/callback',
             "AccountReference": f"Order_{order_id}",
             "TransactionDesc": "Payment for order"
         }
@@ -59,6 +59,38 @@ class MpesaService:
 
         response = requests.post(
             f'{self.base_url}/mpesa/stkpush/v1/processrequest',
+            json=payload,
+            headers=headers
+        )
+        print(response.json())
+        return response.json()
+    
+    def check_transaction_status(self, transactionID):
+        access_token = self.generate_access_token()
+        password, timestamp = self.generate_password()
+        
+        headers = {
+            'Authorization': f'Bearer {access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        payload ={    
+                "Initiator":"testapi",
+                "SecurityCredential":password,
+                "CommandID": "TransactionStatusQuery",
+                "TransactionID": transactionID,
+                "PartyA": self.shortcode,
+                "IdentifierType": 4,
+                "ResultURL":"https://2287418c5736.ngrok-free.app/payment/saf-status/",
+                "QueueTimeOutURL":"https://2287418c5736.ngrok-free.app/payment/saf-status/",
+                "Remarks":"OK",
+                "Occasion":"OK",
+            }
+        
+        print(payload)
+        
+        response = requests.post(
+            f'{self.base_url}/mpesa/transactionstatus/v1/query',
             json=payload,
             headers=headers
         )
@@ -84,6 +116,8 @@ class MpesaService:
             transaction.status = "Success"
             transaction.receipt_number = receipt_number
             transaction.save()
+            
+            self.check_transaction_status(receipt_number)
             PayPalReceiptService.send_payment_confirmation(transaction)
 
             # Update order status

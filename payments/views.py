@@ -58,6 +58,13 @@ def check_payment_status(request, transaction_id):
     })
     
 
+@csrf_exempt
+def payment_status(request):
+    if request.method == "POST":
+        data = json.loads(request.body.decode("utf-8"))
+        print("Callback received:", data)
+        return JsonResponse({"ResultCode": 0, "ResultDesc": "Accepted"})
+    return JsonResponse({"error": "Invalid method"}, status=405)
 
 def payment_success(request):
     paymentId = request.GET.get('paymentId')
