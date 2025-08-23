@@ -7,6 +7,7 @@ __pycache__
 
 # Migration files
 */migrations/[!'__init__.py']*
+staticfiles/
 
 
 # Database

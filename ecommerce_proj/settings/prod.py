@@ -1,16 +1,13 @@
 from .base import *
+from dotenv import load_dotenv
+import dj_database_url
+
+load_dotenv()
 
 DEBUG = False
-ALLOWED_HOSTS += ['http://domain.com']
+ALLOWED_HOSTS += ['*']
 WSGI_APPLICATION = 'ecommerce_proj.wsgi.prod.application'
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'db_name',
-        'USER': 'db_user',
-        'PASSWORD': 'db_password',
-        'HOST': 'localhost',
-        'PORT': '',
+        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
     }
-}
