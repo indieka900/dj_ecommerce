@@ -4,7 +4,7 @@ import dj_database_url
 
 load_dotenv()
 
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS += ['*']
 WSGI_APPLICATION = 'ecommerce_proj.wsgi.prod.application'
 
