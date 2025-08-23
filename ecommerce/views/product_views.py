@@ -56,7 +56,7 @@ def directory(request):
 
 def products_by_parent_c(request, slug):
     page_number = request.GET.get('page', 1)
-    per_page = request.GET.get('per_page', 2)
+    per_page = request.GET.get('per_page', 8)
     
     # Retrieve products with pagination
     products, paginator, parent_category, categories = ProductService.get_products_by_parent_category(

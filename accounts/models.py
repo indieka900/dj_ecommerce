@@ -43,6 +43,9 @@ class CustomUserManager(BaseUserManager):
             raise ValueError("Superuser must have is_superuser=True.")
         extra_fields.setdefault("role", 'Administrator')
         return self.create_user(email, password, **extra_fields)
+    
+    def get_queryset(self):
+        return super().get_queryset().filter(is_deleted=False)
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     Role_choices = (
         ("Administrator", "Administrator"),
@@ -65,7 +68,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     secret = models.CharField(max_length=255, blank=True, null=True)
-
+    is_deleted = models.BooleanField(default=False)
     objects = CustomUserManager()
 
     USERNAME_FIELD = "email"
@@ -79,6 +82,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         if not self.secret:
             self.secret = random_hex(20)
         super().save(*args, **kwargs)
+        
+    def delete(self):
+        self.is_deleted = True
+        self.is_active = False
+        self.save()
 
     '''def generate_totp_token(self):
         totp = TOTP(key=self.otp_secret, digits=6)  # Adjust interval to match the one used in OTPManager

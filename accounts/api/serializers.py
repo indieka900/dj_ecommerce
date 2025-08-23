@@ -1,4 +1,8 @@
 from rest_framework import serializers
+from ecommerce.models import Order, OrderItem
+from accounts.models import Address
+from django.contrib.auth import get_user_model
+from django.db.models import Sum
 from django.db import transaction
 from django.contrib.auth import authenticate
 from django.contrib.auth.tokens import default_token_generator
@@ -6,8 +10,10 @@ from django.utils.http import urlsafe_base64_encode,urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.core.mail import send_mail
 from django.conf import settings
-from accounts.models import CustomUser, Profile, CustomerProfile
+from accounts.models import CustomUser, CustomerProfile
 from accounts.utils import OTPManager
+
+User = get_user_model()
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
@@ -220,3 +226,174 @@ class AddAdminSerializer(serializers.ModelSerializer):
         except Exception as e:
             print(f"Error sending password setup email: {str(e)}")
             raise serializers.ValidationError("Failed to send password setup email. Please try again.")
+
+
+class AddressSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Address
+        fields = '__all__'
+
+class CustomerStatsSerializer(serializers.Serializer):
+    total_orders = serializers.IntegerField()
+    total_spent = serializers.DecimalField(max_digits=10, decimal_places=2)
+    last_order_date = serializers.DateTimeField()
+    avg_order_value = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+class CustomerOrderSerializer(serializers.ModelSerializer):
+    status_display = serializers.CharField(source='get_status_display', read_only=True)
+    payment_status_display = serializers.CharField(source='get_payment_status_display', read_only=True)
+    items = serializers.SerializerMethodField()
+    class Meta:
+        model = Order
+        fields = [
+            'id', 'order_number', 'status', 'status_display', 
+            'payment_status', 'payment_status_display', 'total',
+            'created_at', 'updated_at', 'tracking_number', 'items'
+        ]
+
+    def get_items(self, obj):
+        items = obj.items.all()
+        return items.count()
+class CustomerDetailSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    orders = CustomerOrderSerializer(many=True, read_only=True)
+    stats = serializers.SerializerMethodField()
+    tier = serializers.SerializerMethodField()
+    is_vip = serializers.SerializerMethodField()
+    last_activity = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'full_name',
+            'phone_number', 'is_active', 'date_joined', 'role',
+            'orders', 'stats', 'tier', 'is_vip', 'last_activity'
+        ]
+    
+    def get_full_name(self, obj):
+        return f"{obj.first_name or ''} {obj.last_name or ''}".strip() or obj.email.split('@')[0]
+    
+    def get_stats(self, obj):
+        orders = obj.orders.filter(payment_status='Paid')
+        total_spent = orders.aggregate(total=Sum('total'))['total'] or 0
+        total_orders = orders.count()
+        # items = OrderItem.objects.filter(order__in=orders).count()
+        last_order = orders.first()
+        avg_order_value = total_spent / total_orders if total_orders > 0 else 0
+        
+        return {
+            'total_orders': total_orders,
+            'total_spent': total_spent,
+            # 'items' : items,
+            'last_order_date': last_order.created_at if last_order else None,
+            'avg_order_value': avg_order_value
+        }
+    
+    def get_tier(self, obj):
+        total_spent = obj.orders.filter(payment_status='Paid').aggregate(
+            total=Sum('total'))['total'] or 0
+        
+        if total_spent >= 30000:
+            return 'Platinum'
+        elif total_spent >= 10000:
+            return 'Gold'
+        elif total_spent >= 1000:
+            return 'Silver'
+        else:
+            return 'Bronze'
+    
+    def get_is_vip(self, obj):
+        total_spent = obj.orders.filter(payment_status='Paid').aggregate(
+            total=Sum('total'))['total'] or 0
+        return total_spent >= 30000
+    
+    def get_last_activity(self, obj):
+        last_order = obj.orders.first()
+        return last_order.created_at if last_order else obj.date_joined
+
+class CustomerListSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    total_orders = serializers.SerializerMethodField()
+    total_spent = serializers.SerializerMethodField()
+    tier = serializers.SerializerMethodField()
+    is_vip = serializers.SerializerMethodField()
+    last_activity = serializers.SerializerMethodField()
+    avatar = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = User
+        fields = [
+            'id', 'email', 'first_name', 'last_name', 'full_name',
+            'phone_number', 'is_active', 'date_joined', 'role',
+            'total_orders', 'total_spent', 'tier', 'is_vip',
+            'last_activity', 'avatar'
+        ]
+    
+    def get_full_name(self, obj):
+        return f"{obj.first_name or ''} {obj.last_name or ''}".strip() or obj.email.split('@')[0]
+    
+    def get_total_orders(self, obj):
+        return obj.orders.filter(payment_status='Paid').count()
+    
+    def get_total_spent(self, obj):
+        return obj.orders.filter(payment_status='Paid').aggregate(
+            total=Sum('total'))['total'] or 0
+    
+    def get_tier(self, obj):
+        total_spent = self.get_total_spent(obj)
+        if total_spent >= 30000:
+            return 'Platinum'
+        elif total_spent >= 10000:
+            return 'Gold'
+        elif total_spent >= 5000:
+            return 'Silver'
+        else:
+            return 'Bronze'
+    
+    def get_is_vip(self, obj):
+        return self.get_total_spent(obj) >= 30000
+    
+    def get_last_activity(self, obj):
+        last_order = obj.orders.first()
+        return last_order.created_at if last_order else obj.date_joined
+    
+    def get_avatar(self, obj):
+        name = self.get_full_name(obj)
+        return f"https://ui-avatars.com/api/?name={name}&background=random"
+
+class CustomerCreateUpdateSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    
+    class Meta:
+        model = User
+        fields = [
+            'email', 'first_name', 'last_name', 'phone_number',
+            'is_active', 'role', 'password'
+        ]
+    
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        user = User(**validated_data)
+        if password:
+            user.set_password(password)
+        else:
+            user.set_unusable_password()
+        user.save()
+        return user
+    
+    def update(self, instance, validated_data):
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
+class CustomerStatsOverviewSerializer(serializers.Serializer):
+    total_customers = serializers.IntegerField()
+    active_customers = serializers.IntegerField()
+    inactive_customers = serializers.IntegerField()
+    vip_customers = serializers.IntegerField()
+    total_revenue = serializers.DecimalField(max_digits=12, decimal_places=2)
+    new_customers_this_month = serializers.IntegerField()

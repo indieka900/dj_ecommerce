@@ -1,0 +1,22 @@
+databases:
+  - name: dj-ecommerce-db 
+    databaseName: dj_ecommerce
+    user: dj_ecommerce 
+
+services:
+  - type: web
+    name: dj-ecommerce 
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn ecommerce_proj.wsgi.prod:application" 
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: dj-ecommerce-db 
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: False
+      - key: WEB_CONCURRENCY
+        value: 4

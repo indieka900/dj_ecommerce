@@ -12,7 +12,7 @@ class BrandSerializer(serializers.ModelSerializer):
     product_count = serializers.IntegerField(read_only=True)
     class Meta:
         model = Brand
-        fields = ['id', 'brand_title', 'product_count']
+        fields = ['id', 'brand_title', 'product_count', 'image']
 
 class CategorySerializer(serializers.ModelSerializer):
     parent_category_name = serializers.CharField(source='parent_category.parent_name', read_only=True)

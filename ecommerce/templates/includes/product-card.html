@@ -1,66 +1,88 @@
-<div class="item">
+{% load category_tags %}
+{% load product_filters %}
+
+<div class="item" id="enhanced-product-card">
     <div class="image-container">
-        <a class="item-img-wrapper-link" href="/product/{{item.id}}/">
-            <img class="img-fluid" src="{{ item.prod_img.url }}" alt="Product">
+        <a class="item-img-wrapper-link" href="{% url 'product_detail' item.id %}">
+            {% if item.prod_img %}
+            <img class="img-fluid" src="{{ item.prod_img.url }}" alt="{{ item.title }}">
+            {% else %}
+            <img class="img-fluid" src="/static/images/default-product.jpg" alt="{{ item.title }}">
+            {% endif %}
         </a>
         <div class="item-action-behaviors">
-            <!-- <a class="item-quick-look" data-toggle="modal" href="#quick-view">Quick Look
-                                                                                            </a> -->
-            <a class="item-mail" href="javascript:void(0)">Mail</a>
-            <a class="item-addwishlist" href="{% url 'add-to-wishlist' item.id %}">Add
-                to Wishlist</a>
-            <a class="item-addCart" href="{% url 'add_to_cart' item.id %}">Add to
-                Cart</a>
+            <a class="item-quick-look" data-toggle="modal" href="#quick-view" data-product-id="{{ item.id }}">
+                Quick Look
+            </a>
+            <a class="item-mail" href="mailto:?subject={{ item.title|urlencode }}">Mail</a>
+            <a class="item-addwishlist" href="javascript:void(0)" data-product-id="{{ item.id }}">
+                Add to Wishlist
+            </a>
+            <a class="item-addCart" href="javascript:void(0)" data-product-id="{{ item.id }}">
+                Add to Cart
+            </a>
         </div>
     </div>
+
     <div class="item-content">
         <div class="what-product-is">
+            {% if item.category %}
             <ul class="bread-crumb">
                 <li class="has-separator">
                     <a href="{% url 'product_by_pcategory' item.category.parent_category.slug %}">
-                        {{item.category.parent_category.parent_name }}
+                        {{ item.category.parent_category.parent_name }}
                     </a>
                 </li>
-                <li class="has-separator">
+                <li>
                     <a href="{% url 'product_by_category' item.category.slug %}">
-                        {{ item.category.category_name}}
+                        {{ item.category.category_name }}
                     </a>
                 </li>
             </ul>
-            <h6 class="item-title">
-                <a href="/product/{{item.id}}/">{{ item.title }}</a>
-            </h6>
-            
-            {% if path != 'home' %}
-                
-            <div class="item-description">
-                <p>This hoodie is full cotton. It includes a muff sewn onto the lower front, and
-                    (usually) a drawstring to adjust the hood opening. Throughout the U.S., it
-                    is common for middle-school, high-school, and college students to wear this
-                    sweatshirts—with or without hoods—that display their respective school names
-                    or mascots across the chest, either as part of a uniform or personal
-                    preference.
-                </p>
-            </div>
             {% endif %}
-                
+
+            <h6 class="item-title">
+                <a href="{% url 'product_detail' item.id %}">{{ item.title }}</a>
+            </h6>
+
+            {% if item.rating > 0 %}
             <div class="item-stars">
-                <div class='star' title="0 out of 5 - based on 0 Reviews">
-                    <span style='width: 20px;'></span>
+                <div class='star' title="{{ item.rating }} out of 5">
+                    <span style='width:{{ item.rating|mul:20 }}%'></span>
                 </div>
                 <span>({{ item.rating }})</span>
             </div>
+            {% endif %}
         </div>
+
         <div class="price-template">
+            {% if item.discount > 0 %}
             <div class="item-new-price">
-                KSH{{ item.current_selling_price }}
+                {{ item.current_selling_price|format_price }}
             </div>
             <div class="item-old-price">
-                KSH{{ item.price }}
+                {% if item.has_variants %}
+                {{ item.price|format_price }}
+                {% else %}
+                {{ item.price|format_price }}
+                {% endif %}
             </div>
+            {% else %}
+            <div class="item-new-price">
+                {{ item.display_price }}
+            </div>
+            {% endif %}
         </div>
     </div>
-    <div class="tag new">
-        <span>NEW</span>
+
+    <!-- Dynamic tags -->
+    {% if item.discount > 0 %}
+    <div class="tag sale">
+        <span>-{{ item.discount|floatformat:0 }}%</span>
     </div>
+    {% elif item.featured %}
+    <div class="tag featured">
+        <span>FEATURED</span>
+    </div>
+    {% endif %}
 </div>

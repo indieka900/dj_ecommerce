@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from ecommerce.views.services import CommonService, ProductService
+from ecommerce.views.services import CommonService
+from appcontent.services import ProductService
 from appcontent.models import Faq
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,7 +12,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from ecommerce.models import (
     Order, OrderItem, Product,
-    Cart,WishlistItem,
+    Cart,WishlistItem, Brand
 )
 from accounts.models import CustomUser
 from payments.models import Transaction
@@ -485,12 +486,12 @@ class ComprehensiveDashboardView(APIView):
     
 def home(request):
     """
-    Render home page with latest products and categories.
+    Render home page with products grouped by parent categories dynamically.
     """
     context = {
-        'latest_products': ProductService.get_latest_products(),
-        'featured_products' : ProductService.get_featured_products(),
-        'categories': ProductService.get_featured_categories(),
+        'parent_categories_data': ProductService.get_parent_categories_with_products(),
+        'featured_categories': ProductService.get_featured_categories(),
+        'brands': Brand.objects.all(),
         'path': 'home',
         **CommonService.get_common_context(request)
     }

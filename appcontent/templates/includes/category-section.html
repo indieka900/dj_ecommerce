@@ -1,0 +1,35 @@
+{% load category_tags %}
+{% load product_filters %}
+
+<section class="section-maker" id="category-section-template">
+    <div class="container">
+        <div class="sec-maker-header text-center">
+            <h3 class="sec-maker-h3">{{ data.parent_category.parent_name|upper }}</h3>
+            <p>{{ data.total_products }} Products Available</p>
+            
+            <ul class="nav tab-nav-style-1-a justify-content-center">
+                <li class="nav-item">
+                    <a class="nav-link active" data-toggle="tab" href="#{{ data.slug }}-latest">Latest</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#{{ data.slug }}-bestselling">Best Selling</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#{{ data.slug }}-toprated">Top Rating</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-toggle="tab" href="#{{ data.slug }}-featured">Featured</a>
+                </li>
+            </ul>
+        </div>
+        
+        {% render_product_tabs data %}
+        
+        <!-- View More Section -->
+        <div class="redirect-link-wrapper text-center u-s-p-t-25">
+            <a class="redirect-link" href="{% url 'product_by_pcategory' data.slug %}">
+                <span>View all {{ data.parent_category.parent_name }}</span>
+            </a>
+        </div>
+    </div>
+</section>
