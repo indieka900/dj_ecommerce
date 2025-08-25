@@ -63,6 +63,9 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
+
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
