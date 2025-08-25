@@ -29,8 +29,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('django-admin/', admin.site.urls),
     path('admin/', never_cache(TemplateView.as_view(template_name="index.html"))),
-    re_path(r'^admin/(?!static/)(?!assets/)(?!.*\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|json|map)$).*$', 
-            never_cache(TemplateView.as_view(template_name="index.html"))),
+    # re_path(r'^admin/(?!static/)(?!assets/)(?!.*\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot|json|map)$).*$', 
+    #         never_cache(TemplateView.as_view(template_name="index.html"))),
     path('', include('ecommerce.urls')),
     path('', include('appcontent.urls')),
     path('api/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

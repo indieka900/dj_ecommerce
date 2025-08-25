@@ -63,8 +63,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
 
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -176,8 +174,6 @@ STATIC_URL = '/static/'
 MEDIA_URL = 'ecommerce_proj/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

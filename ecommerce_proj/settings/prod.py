@@ -4,6 +4,19 @@ import dj_database_url
 
 load_dotenv()
 
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
+
+# CRITICAL: Add mimetypes for WhiteNoise to handle JS modules correctly
+WHITENOISE_MIMETYPES = {
+    '.js': 'application/javascript',
+    '.mjs': 'application/javascript',
+    '.css': 'text/css',
+    '.json': 'application/json',
+    '.map': 'application/json',  # Source maps
+}
+
 DEBUG = False
 ALLOWED_HOSTS += ['*']
 WSGI_APPLICATION = 'ecommerce_proj.wsgi.prod.application'
