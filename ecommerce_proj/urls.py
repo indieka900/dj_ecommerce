@@ -1,12 +1,17 @@
+import os
 from django.conf.urls.static import static
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.views.generic import TemplateView
+from django.views.decorators.cache import never_cache
 from django.conf import settings
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework import permissions
 
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+
+from ecommerce_proj.settings.base import BASE_DIR
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -22,7 +27,10 @@ schema_view = get_schema_view(
     )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('django-admin/', admin.site.urls),
+    path('admin/', never_cache(TemplateView.as_view(template_name="index.html"))),
+    re_path(r'^admin/(?!.*\.(js|css|ico|png|jpg|jpeg|gif|svg|woff|woff2|ttf|eot)$).*$', 
+        never_cache(TemplateView.as_view(template_name="index.html"))),
     path('', include('ecommerce.urls')),
     path('', include('appcontent.urls')),
     path('api/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
@@ -44,3 +52,5 @@ handler404 = 'accounts.views.error_404_view'
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+urlpatterns += static('/admin/', document_root=os.path.join(BASE_DIR, 'dist'))
+
