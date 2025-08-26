@@ -5,6 +5,8 @@ echo "Starting build"
 
 set -o errexit
 
+rm -rf staticfiles
+
 pip install -r requirements.txt
 
 python manage.py collectstatic --no-input --settings=ecommerce_proj.settings.prod

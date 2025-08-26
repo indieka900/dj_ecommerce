@@ -7,9 +7,19 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.views.static import serve
+from django.http import HttpResponse
 import os
 from django.conf import settings
 from django.conf.urls.static import static
+
+# Custom view to serve JavaScript files with correct MIME type
+def serve_js_file(request, path):
+    """Serve JavaScript files with correct MIME type"""
+    from django.views.static import serve
+    response = serve(request, path, document_root=os.path.join(settings.BASE_DIR, 'dist'))
+    if path.endswith(('.js', '.mjs')):
+        response['Content-Type'] = 'application/javascript'
+    return response
 
 # Serve React index.html for admin SPA
 react_admin_view = never_cache(TemplateView.as_view(template_name="index.html"))
@@ -30,19 +40,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     # Django admin
     path("django-admin/", admin.site.urls),
-
-    # React Admin SPA
-    re_path(r"^admin/(?!static/|media/|assets/).*", react_admin_view),
-    path("admin/", react_admin_view),
-
-    # Django apps
-    path("", include("ecommerce.urls")),
-    path("", include("appcontent.urls")),
-    path("accounts/", include("accounts.urls")),
-    path("blogs/", include("blogs.urls")),
-    path("payment/", include("payments.urls")),
-
-    # API endpoints
+    
+    # API endpoints (put these first to avoid conflicts)
     path("api/ecommerce/", include("ecommerce.api.urls")),
     path("api/analytics/", include("ecommerce.api.analytics.urls")),
     path("api/accounts/", include("accounts.api.urls")),
@@ -51,24 +50,33 @@ urlpatterns = [
     path("api/payments/", include("payments.api.urls")),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
-
+    
     # API Docs
-    path("api/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
+    path("api/docs/", schema_view.with_ui("swagger", cache_timeout=0), name="schema-swagger-ui"),
     path("redoc/", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
+    
+    # Django apps
+    path("", include("ecommerce.urls")),
+    path("", include("appcontent.urls")),
+    path("accounts/", include("accounts.urls")),
+    path("blogs/", include("blogs.urls")),
+    path("payment/", include("payments.urls")),
+    
+    # React Admin SPA (put this last)
+    re_path(r"^admin/(?!static/|media/|assets/).*", react_admin_view),
+    path("admin/", react_admin_view),
 ]
 
 # Custom 404
 handler404 = "accounts.views.error_404_view"
-
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static('/admin/', document_root=os.path.join(settings.BASE_DIR, 'dist'))
 else:
-    # In production, serve static and media files through Django (not recommended for high traffic sites)
     urlpatterns += [
-        re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
-        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-        re_path(r'^admin/static/(?P<path>.*)$', serve, {'document_root': os.path.join(settings.BASE_DIR, 'dist')}),
+        re_path(r'^media/(?P<path>.*)$', serve, {
+            'document_root': settings.MEDIA_ROOT
+        }),
     ]
