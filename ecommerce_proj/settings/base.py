@@ -2,7 +2,6 @@ from datetime import timedelta
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-import dj_database_url
 
 load_dotenv()
 
@@ -53,8 +52,8 @@ LOGIN_URL = '/account/login/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -91,7 +90,6 @@ CORS_ALLOW_HEADERS = [
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost:8000',
     'http://127.0.0.1:8000',
-    'https://2287418c5736.ngrok-free.app',
 ]
 
 ROOT_URLCONF = 'ecommerce_proj.urls'
@@ -167,7 +165,7 @@ USE_I18N = True
 # Static files (CSS, JavaScript, Images)
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'dist'),
+    os.path.join(BASE_DIR, 'dist', 'assets'),
 ]
 
 STATIC_URL = '/static/'

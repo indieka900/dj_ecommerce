@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from django.views.static import serve
 import os
 from django.conf import settings
 from django.conf.urls.static import static
@@ -31,7 +32,7 @@ urlpatterns = [
     path("django-admin/", admin.site.urls),
 
     # React Admin SPA
-    re_path(r"^admin/(?!static/).*$", react_admin_view),
+    re_path(r"^admin/(?!static/|media/|assets/).*", react_admin_view),
     path("admin/", react_admin_view),
 
     # Django apps
@@ -64,3 +65,10 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static('/admin/', document_root=os.path.join(settings.BASE_DIR, 'dist'))
+else:
+    # In production, serve static and media files through Django (not recommended for high traffic sites)
+    urlpatterns += [
+        re_path(r'^static/(?P<path>.*)$', serve, {'document_root': settings.STATIC_ROOT}),
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+        re_path(r'^admin/static/(?P<path>.*)$', serve, {'document_root': os.path.join(settings.BASE_DIR, 'dist')}),
+    ]

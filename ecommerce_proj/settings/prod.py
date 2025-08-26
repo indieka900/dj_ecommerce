@@ -14,8 +14,12 @@ WHITENOISE_MIMETYPES = {
     '.mjs': 'application/javascript',
     '.css': 'text/css',
     '.json': 'application/json',
-    '.map': 'application/json',  # Source maps
+    '.map': 'application/json',
 }
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'dist', 'assets'),
+]
 
 DEBUG = False
 ALLOWED_HOSTS += ['*']
