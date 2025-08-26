@@ -56,7 +56,7 @@ X_FRAME_OPTIONS = 'DENY'
 # CORS settings for production
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOWED_ORIGINS = [
-    os.environ.get('FRONTEND_URL', 'http://localhost:5173'),
+    os.environ.get('FRONTEND_URLq', 'http://localhost:5173'),
     'https://dj-ecommerce-xevb.onrender.com',
 ]
 
