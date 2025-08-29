@@ -62,7 +62,10 @@ class OrderViewSet(viewsets.ModelViewSet):
                 {'error': 'Invalid status'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+        email = send_mail(
+            'Order Status Updated',
+            f'Your order {order.order_number} status has been updated to {new_status}.',
+            )
         order.status = new_status
         order.save()
         

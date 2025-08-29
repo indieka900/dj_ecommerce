@@ -7,19 +7,10 @@ from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from django.views.static import serve
-from django.http import HttpResponse
 import os
 from django.conf import settings
 from django.conf.urls.static import static
 
-# Custom view to serve JavaScript files with correct MIME type
-def serve_js_file(request, path):
-    """Serve JavaScript files with correct MIME type"""
-    from django.views.static import serve
-    response = serve(request, path, document_root=os.path.join(settings.BASE_DIR, 'dist'))
-    if path.endswith(('.js', '.mjs')):
-        response['Content-Type'] = 'application/javascript'
-    return response
 
 # Serve React index.html for admin SPA
 react_admin_view = never_cache(TemplateView.as_view(template_name="index.html"))
@@ -63,7 +54,8 @@ urlpatterns = [
     path("payment/", include("payments.urls")),
     
     # React Admin SPA (put this last)
-    re_path(r"^admin/(?!static/|media/|assets/).*", react_admin_view),
+    # re_path(r"^admin/(?!static/|media/|assets/).*", react_admin_view),
+    re_path(r"^admin/(?!static/|media/).*", react_admin_view),
     path("admin/", react_admin_view),
 ]
 
@@ -76,6 +68,9 @@ if settings.DEBUG:
     urlpatterns += static('/admin/', document_root=os.path.join(settings.BASE_DIR, 'dist'))
 else:
     urlpatterns += [
+        re_path(r'^admin/assets/(?P<path>.*)$', serve, {
+            'document_root': os.path.join(settings.BASE_DIR, 'dist', 'assets'),
+        }),
         re_path(r'^media/(?P<path>.*)$', serve, {
             'document_root': settings.MEDIA_ROOT
         }),

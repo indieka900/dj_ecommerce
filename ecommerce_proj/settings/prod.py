@@ -34,7 +34,7 @@ WHITENOISE_MIMETYPES = {
 # Static files configuration
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'dist', 'assets'),
-    os.path.join(BASE_DIR, 'dist'),  # Add this to serve other static files from dist
+    os.path.join(BASE_DIR, 'dist'),
 ]
 
 # Production settings
