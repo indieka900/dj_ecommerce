@@ -32,7 +32,6 @@ urlpatterns = [
     # Django admin
     path("django-admin/", admin.site.urls),
     
-    # API endpoints (put these first to avoid conflicts)
     path("api/ecommerce/", include("ecommerce.api.urls")),
     path("api/analytics/", include("ecommerce.api.analytics.urls")),
     path("api/accounts/", include("accounts.api.urls")),
@@ -54,8 +53,7 @@ urlpatterns = [
     path("payment/", include("payments.urls")),
     
     # React Admin SPA (put this last)
-    # re_path(r"^admin/(?!static/|media/|assets/).*", react_admin_view),
-    re_path(r"^admin/(?!static/|media/).*", react_admin_view),
+    re_path(r"^admin/(?!static/|media/|assets/).*", react_admin_view),
     path("admin/", react_admin_view),
 ]
 

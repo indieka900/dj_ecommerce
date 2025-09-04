@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Sum, Count, Avg, Q, F
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
 from django.contrib.auth import get_user_model
 from django.db.models.functions import TruncDate, TruncMonth, TruncYear
 from django.utils import timezone
@@ -62,12 +64,31 @@ class OrderViewSet(viewsets.ModelViewSet):
                 {'error': 'Invalid status'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        email = send_mail(
-            'Order Status Updated',
-            f'Your order {order.order_number} status has been updated to {new_status}.',
-            )
         order.status = new_status
         order.save()
+        
+        status_subjects = {
+            'pending': f"Order Confirmed - #{order.order_number}",
+            'processing': f"Order Processing - #{order.order_number}",
+            'shipped': f"Order Shipped - #{order.order_number}",
+            'delivered': f"Order Delivered - #{order.order_number}",
+            'cancelled': f"Order Cancelled - #{order.order_number}",
+        }
+
+        subject = status_subjects.get(new_status, f"Order Status Updated - #{order.order_number}")
+        recipient_list = [order.user.email]
+        context = {
+            "customer_name": order.user.first_name or "Valued Customer",
+            "order_number": order.order_number,
+            "new_status": new_status,
+        }
+        html_content = render_to_string("emails/order_status_update.html", context)
+        text_content = f"Hello {order.user.first_name or 'Valued Customer'},\n\nYour order #{order.order_number} status has been updated to {new_status}.\n\nThank you for shopping with us!\n\nBest regards,\nYour Store Team"
+
+        # Send email with both text + HTML
+        email = EmailMultiAlternatives(subject, text_content, to=recipient_list)
+        email.attach_alternative(html_content, "text/html")
+        email.send()
         
         return Response({'status': 'Order status updated'})
     
