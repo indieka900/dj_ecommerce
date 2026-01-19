@@ -18,3 +18,5 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '3306'),
     }
 }
+
+MEDIA_URL = 'ecommerce_proj/media/'

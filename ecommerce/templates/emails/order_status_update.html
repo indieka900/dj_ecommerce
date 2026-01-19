@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Status Update - {{ order_number }}</title>
+    <!--[if mso]>
+    <noscript>
+        <xml>
+            <o:OfficeDocumentSettings>
+                <o:PixelsPerInch>96</o:PixelsPerInch>
+            </o:OfficeDocumentSettings>
+        </xml>
+    </noscript>
+    <![endif]-->
+</head>
+
+<body
+    style="margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+    <!-- Main Container -->
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+        style="background-color: #f8fafc;">
+        <tr>
+            <td align="center" style="padding: 40px 20px;">
+                <!-- Email Content Container -->
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="600"
+                    style="max-width: 600px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+
+                    <!-- Header -->
+                    <tr>
+                        <td
+                            style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; text-align: center;">
+                            <h1
+                                style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -0.5px;">
+                                Order Status Update
+                            </h1>
+                            <div
+                                style="width: 50px; height: 3px; background-color: #ffffff; margin: 15px auto; border-radius: 2px; opacity: 0.8;">
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Main Content -->
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <!-- Greeting -->
+                            <h2 style="color: #1a202c; margin: 0 0 20px 0; font-size: 24px; font-weight: 600;">
+                                Hello {{ customer_name }}! 👋
+                            </h2>
+
+                            <!-- Main Message -->
+                            <p style="color: #4a5568; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+                                We're writing to let you know that your order status has been updated.
+                            </p>
+
+                            <!-- Order Details Card -->
+                            <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%"
+                                style="background-color: #f7fafc; border-radius: 8px; border-left: 4px solid #667eea; margin: 30px 0;">
+                                <tr>
+                                    <td style="padding: 25px;">
+                                        <h3
+                                            style="color: #2d3748; margin: 0 0 15px 0; font-size: 18px; font-weight: 600;">
+                                            📦 Order Details
+                                        </h3>
+
+                                        <!-- Order Number -->
+                                        <div style="margin-bottom: 15px;">
+                                            <span
+                                                style="color: #718096; font-size: 14px; font-weight: 500; display: inline-block; width: 100px;">Order
+                                                #:</span>
+                                            <span
+                                                style="color: #2d3748; font-size: 16px; font-weight: 600; font-family: 'Courier New', monospace;">
+                                                {{ order_number }}
+                                            </span>
+                                        </div>
+
+                                        <!-- Status Badge -->
+                                        <div style="margin-bottom: 10px;">
+                                            <span
+                                                style="color: #718096; font-size: 14px; font-weight: 500; display: inline-block; width: 100px;">Status:</span>
+                                            <span
+                                                style="background-color: #48bb78; color: #ffffff; padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; text-transform: capitalize; display: inline-block;">
+                                                {{ new_status }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Status-specific Messages -->
+                            {% if new_status == 'Pending' %}
+                            <div
+                                style="background-color: #fef5e7; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #f6ad55;">
+                                <p style="color: #744210; margin: 0; font-size: 15px; line-height: 1.5;">
+                                    <strong>📋 Order Confirmed:</strong> We've received your order and it's being
+                                    prepared for processing.
+                                </p>
+                            </div>
+                            {% elif new_status == 'Processing' %}
+                            <div
+                                style="background-color: #e6fffa; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #38b2ac;">
+                                <p style="color: #234e52; margin: 0; font-size: 15px; line-height: 1.5;">
+                                    <strong>⚙️ Processing:</strong> Your order is now being prepared by our team. We'll
+                                    update you once it ships!
+                                </p>
+                            </div>
+                            {% elif new_status == 'Shipped' %}
+                            <div
+                                style="background-color: #f0fff4; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #48bb78;">
+                                <p style="color: #22543d; margin: 0; font-size: 15px; line-height: 1.5;">
+                                    <strong>🚚 Shipped:</strong> Great news! Your order is on its way to you. You should
+                                    receive it within 2-5 business days.
+                                </p>
+                            </div>
+                            {% elif new_status == 'Delivered' %}
+                            <div
+                                style="background-color: #f0fff4; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #48bb78;">
+                                <p style="color: #22543d; margin: 0; font-size: 15px; line-height: 1.5;">
+                                    <strong>✅ Delivered:</strong> Your order has been successfully delivered! We hope
+                                    you love your purchase.
+                                </p>
+                            </div>
+                            {% elif new_status == 'Cancelled' %}
+                            <div
+                                style="background-color: #fed7d7; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #fc8181;">
+                                <p style="color: #742a2a; margin: 0; font-size: 15px; line-height: 1.5;">
+                                    <strong>❌ Cancelled:</strong> Your order has been cancelled. If you were charged, a
+                                    refund will be processed within 3-5 business days.
+                                </p>
+                            </div>
+                            {% else %}
+                            <div
+                                style="background-color: #ebf8ff; border-radius: 8px; padding: 20px; margin: 20px 0; border-left: 4px solid #4299e1;">
+                                <p style="color: #2a4365; margin: 0; font-size: 15px; line-height: 1.5;">
+                                    <strong>📢 Status Updated:</strong> Your order status has been updated to {{ new_status }}.
+                                </p>
+                            </div>
+                            {% endif %}
+
+                            <!-- Call to Action Button -->
+                            <!-- <div style="text-align: center; margin: 40px 0;">
+                                <a href="#"
+                                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #ffffff; text-decoration: none; padding: 14px 30px; border-radius: 6px; font-weight: 600; font-size: 16px; display: inline-block; box-shadow: 0 2px 4px rgba(102, 126, 234, 0.3); transition: all 0.3s ease;">
+                                    Track Your Order
+                                </a>
+                            </div> -->
+
+                            <!-- Support Information -->
+                            <div style="background-color: #f7fafc; border-radius: 8px; padding: 20px; margin: 30px 0;">
+                                <h4 style="color: #2d3748; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">
+                                    Need Help? 🤝
+                                </h4>
+                                <p style="color: #4a5568; margin: 0; font-size: 14px; line-height: 1.5;">
+                                    If you have any questions about your order, our support team is here to help!
+                                    <a href="mailto:support@example.com"
+                                        style="color: #667eea; text-decoration: none; font-weight: 500;">Contact us</a>
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background-color: #2d3748; padding: 30px; text-align: center;">
+                            <!-- Company Logo/Name -->
+                            <div style="margin-bottom: 20px;">
+                                <h3 style="color: #ffffff; margin: 0; font-size: 20px; font-weight: 600;">
+                                    Your Store Name
+                                </h3>
+                            </div>
+
+                            <!-- Social Links -->
+                            <div style="margin-bottom: 20px;">
+                                <a href="#"
+                                    style="display: inline-block; margin: 0 10px; color: #a0aec0; text-decoration: none; font-size: 14px;">Facebook</a>
+                                <a href="#"
+                                    style="display: inline-block; margin: 0 10px; color: #a0aec0; text-decoration: none; font-size: 14px;">Twitter</a>
+                                <a href="#"
+                                    style="display: inline-block; margin: 0 10px; color: #a0aec0; text-decoration: none; font-size: 14px;">Instagram</a>
+                            </div>
+
+                            <!-- Footer Text -->
+                            <p style="color: #a0aec0; margin: 0; font-size: 12px; line-height: 1.4;">
+                                This is an automated message. Please do not reply to this email.<br>
+                                © 2025 Your Store Name. All rights reserved.
+                            </p>
+
+                            <!-- Unsubscribe -->
+                            <p style="color: #718096; margin: 15px 0 0 0; font-size: 11px;">
+                                <a href="#" style="color: #718096; text-decoration: underline;">Unsubscribe</a> |
+                                <a href="#" style="color: #718096; text-decoration: underline;">Privacy Policy</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

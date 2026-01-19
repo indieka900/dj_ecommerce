@@ -51,7 +51,7 @@ class MpesaService:
             "PartyA": phone,
             "PartyB": self.shortcode,
             "PhoneNumber": phone,
-            "CallBackURL": 'https://2287418c5736.ngrok-free.app/payment/callback',
+            "CallBackURL": 'https://dj-ecommerce-xevb.onrender.com/payment/callback',
             "AccountReference": f"Order_{order_id}",
             "TransactionDesc": "Payment for order"
         }
