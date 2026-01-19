@@ -43,24 +43,26 @@ ALLOWED_HOSTS += ['dj-ecommerce-xevb.onrender.com', 'localhost', '127.0.0.1']
 MEDIA_URL = '/media/'
 WSGI_APPLICATION = 'ecommerce_proj.wsgi.prod.application'
 
-# Database
-DATABASES = {
-    'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
-}
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
-# Security settings for production
-SECURE_BROWSER_XSS_FILTER = True
-SECURE_CONTENT_TYPE_NOSNIFF = True
-X_FRAME_OPTIONS = 'DENY'
+if DATABASE_URL:
+    # Parse the database URL
+    db_config = dj_database_url.parse(DATABASE_URL)
+    
+    # Add SSL configuration for Render PostgreSQL
+    db_config['OPTIONS'] = {
+        'sslmode': 'require',
+    }
+    
+    DATABASES = {
+        'default': db_config
+    }
 
-# CORS settings for production
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    os.environ.get('FRONTEND_URLq', 'http://localhost:5173'),
-    'https://dj-ecommerce-xevb.onrender.com',
-]
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://dj-ecommerce-xevb.onrender.com',
-    'http://localhost:5173',
-]
+SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SECURE_HSTS_SECONDS = 31536000 
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
